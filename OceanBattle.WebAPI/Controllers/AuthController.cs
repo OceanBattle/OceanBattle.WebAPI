@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
-namespace WebAPI.Controllers
+namespace OceanBattle.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -12,6 +12,6 @@ namespace WebAPI.Controllers
         public AuthController(ILogger<AuthController> logger)
         {
             _logger = logger;
-        } 
+        }
     }
 }

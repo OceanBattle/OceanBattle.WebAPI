@@ -7,9 +7,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.WebAPI", "Ocean
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.DataModel", "DataModel\DataModel\OceanBattle.DataModel.csproj", "{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OceanBattle.Rsa.Abstractions", "OceanBattle.Rsa.Abstractions\OceanBattle.Rsa.Abstractions.csproj", "{193E5525-FF38-4E1F-AD26-4C81E282312F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.Rsa.Abstractions", "OceanBattle.Rsa.Abstractions\OceanBattle.Rsa.Abstractions.csproj", "{193E5525-FF38-4E1F-AD26-4C81E282312F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "OceanBattle.Rsa", "OceanBattle.Rsa\OceanBattle.Rsa.csproj", "{748CD160-FC62-4D36-A9B4-D742003070D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.Rsa", "OceanBattle.Rsa\OceanBattle.Rsa.csproj", "{748CD160-FC62-4D36-A9B4-D742003070D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

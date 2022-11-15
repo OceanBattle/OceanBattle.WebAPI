@@ -41,7 +41,7 @@ namespace OceanBattle.Rsa
             RSA rsa = RSA.Create();
 
             rsa.ImportRSAPublicKey(
-                source: Convert.FromBase64String(_configuration["Bearer:Jwt:Jwks:PublicKey"]!),
+                source: Convert.FromBase64String(_configuration["Jwt:Jwks:PublicKey"]!),
                 bytesRead: out int _);
 
             RsaSecurityKey publicKey = new RsaSecurityKey(rsa)

@@ -14,7 +14,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\OceanBattle.Rsa.Abstractions\OceanBattle.Rsa.Abstractions.csproj" />
-    <ProjectReference Include="..\WebAPI.Rsa.Abstractions\OceanBattle.Rsa.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

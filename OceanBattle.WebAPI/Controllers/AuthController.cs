@@ -27,7 +27,18 @@ namespace OceanBattle.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<AuthResponse>> PostLogIn(LogInRequest request)
         {
-            return Unauthorized();
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            User? user = await _userManager.FindByEmailAsync(request.Email!);
+
+            if (user is null)
+                return Unauthorized("Invalid E-Mail.");
+
+            if (!await _userManager.CheckPasswordAsync(user, request.Password!))
+                return Unauthorized("Invalid Password.");
+
+            return Ok();
         }
     }
 }

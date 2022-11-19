@@ -9,11 +9,13 @@
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="7.0.0" />
     <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="6.25.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\OceanBattle.Rsa.Abstractions\OceanBattle.Rsa.Abstractions.csproj" />
+    <ProjectReference Include="..\OceanBattle.Jwks.Abstractions\OceanBattle.Jwks.Abstractions.csproj" />
   </ItemGroup>
 
 </Project>

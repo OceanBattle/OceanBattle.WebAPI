@@ -29,12 +29,16 @@
 
   <ItemGroup>
     <ProjectReference Include="..\DataModel\DataModel\OceanBattle.DataModel.csproj" />
-    <ProjectReference Include="..\OceanBattle.Rsa.Abstractions\OceanBattle.Rsa.Abstractions.csproj" />
-    <ProjectReference Include="..\OceanBattle.Rsa\OceanBattle.Rsa.csproj" />
+    <ProjectReference Include="..\OceanBattle.Jwks.Abstractions\OceanBattle.Jwks.Abstractions.csproj" />
+    <ProjectReference Include="..\OceanBattle.Jwt\OceanBattle.Jwt.csproj" />
+    <ProjectReference Include="..\OceanBattle.Rsa.Abstractions\OceanBattle.Jwks.Abstractions.csproj" />
+    <ProjectReference Include="..\OceanBattle.Rsa\OceanBattle.Jwks.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="Abstractions\" />
     <Folder Include="Auth\" />
+    <Folder Include="Options\" />
   </ItemGroup>
 
 </Project>

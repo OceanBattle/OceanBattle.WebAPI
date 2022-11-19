@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "OceanBattle.Rsa.Abstractions": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:54002;http://localhost:54003"
+    }
+  }
+}

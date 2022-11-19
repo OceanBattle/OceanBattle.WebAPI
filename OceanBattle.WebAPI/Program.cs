@@ -2,13 +2,15 @@ using OceanBattle.DataModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using OceanBattle.Data;
-using OceanBattle.Rsa.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
-using OceanBattle.Rsa;
-using OceanBattle.Rsa.Abstractions;
+using OceanBattle.Jwks;
+using OceanBattle.Jwks.Abstractions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Data.Sqlite;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using OceanBattle.Jwt;
+using OceanBattle.Jwt.DependencyInjection;
 
 namespace OceanBattle
 {
@@ -55,42 +57,18 @@ namespace OceanBattle
                 options.Password.RequireUppercase = true;
                 options.Password.RequireDigit = true;
                 options.Password.RequiredLength = 8;
-            })
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
 
-            builder.Services.AddRsaKeyFactory();
+            }).AddEntityFrameworkStores<AppDbContext>()
+              .AddDefaultTokenProviders();
+
             builder.Services.AddControllers();
 
             builder.Services.AddAuthentication()
-                .AddJwtBearer(options =>
-                {
-                    IRsaKeyFactory keyFactory = (IRsaKeyFactory)Activator.CreateInstance(
-                        typeof(RsaKeyFactory),
-                        builder.Configuration)!;
-                    
-                    options.RequireHttpsMetadata = true;
-                    options.TokenValidationParameters = new TokenValidationParameters
-                    {
-                        ValidAlgorithms = new List<string> { SecurityAlgorithms.RsaSha512 },
-                        ValidateIssuerSigningKey = true,
-                        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-                        ValidAudience = builder.Configuration["Jwt:Audience"],
-                        IssuerSigningKeys = keyFactory.GetPublicKeys(),
-                        ValidateIssuer = true,
-                        ValidateLifetime = true,
-                        ValidateAudience = true,
-                        RequireAudience = true,
-                        RequireSignedTokens = true,
-                        ValidateTokenReplay = true,
-                        RequireExpirationTime = true
-                    };
-                });
+                            .AddJwtBearer(builder.Configuration.GetSection(nameof(JwtOptions)), 
+                                          builder.Configuration);
 
-            builder.Services.Configure<PasswordHasherOptions>(options =>
-            {
-                options.IterationCount = 500000;
-            });
+            builder.Services.Configure<PasswordHasherOptions>(
+                options => options.IterationCount = 500000);
 
             builder.Services.AddAuthorizationCore();
 

@@ -7,6 +7,9 @@ using OceanBattle.DataModel.DTOs;
 
 namespace OceanBattle.Controllers
 {
+    /// <summary>
+    /// Controller handling operations on users (eg. CRUD operations).
+    /// </summary>
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
@@ -19,6 +22,11 @@ namespace OceanBattle.Controllers
             _userManager = userManager;
         }
 
+        /// <summary>
+        /// Registers new user and adds to database.
+        /// </summary>
+        /// <param name="request">Request model body containing informations about user.</param>
+        /// <returns><see cref="Task{IActionResult}"/> response.</returns>
         [AllowAnonymous]
         [HttpPost("register")]
         public async Task<IActionResult> PostRegister(RegisterRequest request)

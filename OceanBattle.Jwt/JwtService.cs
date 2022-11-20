@@ -6,7 +6,6 @@ using OceanBattle.Jwt.Abstractions;
 using OceanBattle.Jwt.Helpers;
 using OceanBattle.RefreshTokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net;
 using System.Security.Claims;
 
 namespace OceanBattle.Jwt

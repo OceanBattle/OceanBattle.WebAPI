@@ -1,15 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Distributed;
 using OceanBattle.Jwt.Abstractions;
-using OceanBattle.Jwt.Helpers;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net;
-using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OceanBattle.Jwt
 {

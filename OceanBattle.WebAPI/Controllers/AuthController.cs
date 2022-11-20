@@ -7,6 +7,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.Net.Http.Headers;
 using OceanBattle.DataModel;
 using OceanBattle.DataModel.DTOs;
+using OceanBattle.Jwks.Abstractions;
 using OceanBattle.Jwt.Abstractions;
 using OceanBattle.RefreshTokens.Abstractions;
 using OceanBattle.RefreshTokens.DataModel;
@@ -27,6 +28,7 @@ namespace OceanBattle.Controllers
         private readonly UserManager<User> _userManager;
         private readonly IJwtFactory _jwtFactory;
         private readonly IJwtService _jwtService;
+        private readonly IJwksFactory _jwksFactory;
         private readonly IRefreshTokenFactory _refreshTokenFactory;
         private readonly IRefreshTokenService _refreshTokenService;
 
@@ -35,6 +37,7 @@ namespace OceanBattle.Controllers
             UserManager<User> userManager,
             IJwtFactory jwtFactory,
             IJwtService jwtService,
+            IJwksFactory jwksFactory,
             IRefreshTokenFactory refreshTokenFactory,
             IRefreshTokenService refreshTokenService)
         {
@@ -42,6 +45,7 @@ namespace OceanBattle.Controllers
             _userManager = userManager;
             _jwtFactory = jwtFactory;
             _jwtService = jwtService;
+            _jwksFactory = jwksFactory;
             _refreshTokenFactory = refreshTokenFactory;
             _refreshTokenService = refreshTokenService;
         }
@@ -127,6 +131,19 @@ namespace OceanBattle.Controllers
 
             return Ok();
         }
+
+        /// <summary>
+        /// Endpoint exposing public RSA keys for JWT authentication.
+        /// </summary>
+        /// <returns><see cref="IActionResult"/> containing JSON Web Key Set.</returns>
+        [AllowAnonymous]
+        [HttpGet(".well-known")]
+        public IActionResult GetWellKnown() =>
+            Ok(new
+            {
+                keys = _jwksFactory.GetPublicKeys()
+            });
+
 
         #region private helpers
 

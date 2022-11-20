@@ -101,6 +101,7 @@ namespace OceanBattle
             app.UseHttpsRedirection();
 
             app.UseHsts();
+            app.UseJwtBlacklist();
             app.UseAuthentication();
             app.UseAuthorization();
 

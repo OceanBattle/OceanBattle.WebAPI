@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
@@ -31,7 +32,7 @@ namespace OceanBattle.Jwt.DependencyInjection
         {
             builder.Services.AddJwks(configuration.GetSection(nameof(JwksOptions)));
             builder.Services.Configure<JwtOptions>(jwtOptions);
-            builder.Services.AddTransient<IJwtFactory, JwtFactory>();
+            builder.Services.TryAddTransient<IJwtFactory, JwtFactory>();
 
             builder.AddJwtBearer(options =>
             {
@@ -66,7 +67,12 @@ namespace OceanBattle.Jwt.DependencyInjection
                 };
             });
 
-            builder.Services.AddTransient<IJwtService, JwtService>();
+            builder.Services.TryAddTransient<IJwtService, JwtService>();
+
+            // TODO: Configure distributed cache.
+            builder.Services.AddDistributedMemoryCache();
+            
+            builder.Services.TryAddTransient<JwtBlacklistMiddleware>();
 
             return builder;
         }

@@ -17,7 +17,7 @@ namespace OceanBattle.RefreshTokens.DependencyInjection
             where TContext : RefreshTokenDbContext
         {
             builder.Services.TryAddScoped<RefreshTokenDbContext>(provider => provider.GetRequiredService<TContext>());
-            builder.Services.AddTransient<IRefreshTokenService, RefreshTokenService>();
+            builder.Services.TryAddTransient<IRefreshTokenService, RefreshTokenService>();
             return builder;
         }
     }

@@ -1,13 +1,13 @@
 ﻿using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OceanBattle.Jwt.Abstractions;
-using System;
-using System.Collections.Generic;
+using OceanBattle.Jwt.Helpers;
+using OceanBattle.RefreshTokens;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
+using System.Security.Claims;
 
 namespace OceanBattle.Jwt
 {
@@ -17,12 +17,42 @@ namespace OceanBattle.Jwt
     public class JwtService : IJwtService
     {
         private readonly TokenValidationParameters _tokenValidationParameters;
+        private readonly IDistributedCache _cache;
+        private readonly RefreshTokenOptions _refreshTokenOptions;
+        private readonly JwtOptions _jwtOptions;
 
-        public JwtService(IOptionsMonitor<JwtBearerOptions> options)
+        public JwtService(
+            IOptionsMonitor<JwtBearerOptions> options,
+            IDistributedCache cache,
+            IOptions<RefreshTokenOptions> refreshTokenOptions,
+            IOptions<JwtOptions> jwtOptions)
         {
             _tokenValidationParameters = 
                 options.Get(JwtBearerDefaults.AuthenticationScheme)
                        .TokenValidationParameters;
+
+            _cache = cache;
+            _refreshTokenOptions = refreshTokenOptions.Value;
+            _jwtOptions = jwtOptions.Value;
+        }
+
+        /// <summary>
+        /// Adds JTI claim of requested JSON Web Token to blacklist (this token will no longer be recognized as valid).
+        /// </summary>
+        /// <param name="token">JSON Web Token to be added to blacklist.</param>
+        /// <returns><see cref="Task"/> representing <see langword="async"/> operation.</returns>
+        public async Task BlacklistTokenAsync(JwtSecurityToken token)
+        {
+            var cacheOptions = new DistributedCacheEntryOptions
+            {
+                SlidingExpiration = 
+                    _refreshTokenOptions.Expires.Add(_jwtOptions.Expires)
+            };
+
+            await _cache.SetStringAsync(
+                string.Format("{0}{1}", StringHelpers.BlacklistPath, token.Id), 
+                token.RawData, 
+                cacheOptions);
         }
 
         /// <summary>
@@ -38,7 +68,12 @@ namespace OceanBattle.Jwt
 
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            return await tokenHandler.ValidateTokenAsync(token, validationParameters);
+            var result = await tokenHandler.ValidateTokenAsync(token, validationParameters);
+
+            if (result.IsValid)
+                result.IsValid = !(await IsTokenBlacklistedAsync((new JwtSecurityToken(token)).Claims));
+            
+            return result;
         }
 
         /// <summary>
@@ -50,7 +85,25 @@ namespace OceanBattle.Jwt
         {
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            return await tokenHandler.ValidateTokenAsync(token, _tokenValidationParameters);
+            var result = await tokenHandler.ValidateTokenAsync(token, _tokenValidationParameters);
+
+            if (result.IsValid)
+                result.IsValid = !(await IsTokenBlacklistedAsync((new JwtSecurityToken(token)).Claims));
+
+            return result;
+        }
+
+        /// <summary>
+        /// Verifies against the blacklist if JSON Web Token is blacklisted.
+        /// </summary>
+        /// <param name="claims">Token claims.</param>
+        /// <returns><see langword="true"/> if it is blacklisted, <see langword="false"/> if it is not.</returns>
+        public async Task<bool> IsTokenBlacklistedAsync(IEnumerable<Claim> claims)
+        {
+            Claim? claim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti);
+
+            return claim is not null && 
+                await _cache.GetAsync(string.Format("{0}{1}", StringHelpers.BlacklistPath, claim.Value)) != null;      
         }
     }
 }

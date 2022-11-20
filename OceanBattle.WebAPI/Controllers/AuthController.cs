@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using OceanBattle.DataModel;
 using OceanBattle.DataModel.DTOs;
 using OceanBattle.Jwt.Abstractions;
@@ -120,6 +122,8 @@ namespace OceanBattle.Controllers
                 return BadRequest();
 
             await _refreshTokenService.RevokeTokenAsync(user);
+            await _jwtService.BlacklistTokenAsync(
+                new JwtSecurityToken(await HttpContext.GetTokenAsync("access_token")));
 
             return Ok();
         }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using OceanBattle.RefreshTokens.Abstractions;
 using OceanBattle.RefreshTokens.DataModel;
 
@@ -18,7 +19,7 @@ namespace OceanBattle.RefreshTokens.DependencyInjection
             IConfigurationSection refreshTokenOptions)
         {
             services.Configure<RefreshTokenOptions>(refreshTokenOptions);
-            services.AddTransient<IRefreshTokenFactory, RefreshTokenFactory>();
+            services.TryAddTransient<IRefreshTokenFactory, RefreshTokenFactory>();
             return new RefreshTokensBuilder(services);
         }
     }

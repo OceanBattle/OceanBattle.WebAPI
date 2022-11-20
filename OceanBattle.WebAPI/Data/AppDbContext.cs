@@ -1,10 +1,9 @@
-﻿using OceanBattle.DataModel;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using OceanBattle.RefreshTokens;
 
 namespace OceanBattle.Data
 {
-    public class AppDbContext : IdentityDbContext<User>
+    public class AppDbContext : RefreshTokenDbContext
     {
         public AppDbContext(DbContextOptions options)
             : base(options)

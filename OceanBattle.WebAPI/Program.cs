@@ -1,16 +1,12 @@
-using OceanBattle.DataModel;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using OceanBattle.Data;
-using Microsoft.Extensions.Configuration;
-using Microsoft.IdentityModel.Tokens;
-using OceanBattle.Jwks;
-using OceanBattle.Jwks.Abstractions;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Data.Sqlite;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using OceanBattle.DataModel;
 using OceanBattle.Jwt;
 using OceanBattle.Jwt.DependencyInjection;
+using OceanBattle.RefreshTokens;
+using OceanBattle.RefreshTokens.DependencyInjection;
 
 namespace OceanBattle
 {
@@ -66,6 +62,9 @@ namespace OceanBattle
             builder.Services.AddAuthentication()
                             .AddJwtBearer(builder.Configuration.GetSection(nameof(JwtOptions)), 
                                           builder.Configuration);
+
+            builder.Services.AddRefreshTokens(builder.Configuration.GetSection(nameof(RefreshTokenOptions)))
+                            .AddEntityFrameworkStores<AppDbContext>();
 
             builder.Services.Configure<PasswordHasherOptions>(
                 options => options.IterationCount = 500000);

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace OceanBattle.Jwt
+﻿namespace OceanBattle.Jwt
 {
     /// <summary>
     /// Configuration of JSON Web Token.
@@ -25,5 +19,10 @@ namespace OceanBattle.Jwt
         /// Alghoritm encrypting JWT.
         /// </summary>
         public string? SecurityAlgorithm { get; set; }
+
+        /// <summary>
+        /// JWT lifespan.
+        /// </summary>
+        public TimeSpan Expires { get; set; }
     }
 }

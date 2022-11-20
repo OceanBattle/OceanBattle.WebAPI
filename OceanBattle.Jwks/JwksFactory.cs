@@ -1,9 +1,9 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using OceanBattle.Jwks.Abstractions;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Configuration;
 
 namespace OceanBattle.Jwks
 {

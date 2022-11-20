@@ -60,7 +60,7 @@ namespace OceanBattle.Jwt
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(defaultClaims.Concat(roleClaims)),
-                Expires = DateTime.Now.AddMinutes(15),
+                Expires = DateTime.Now.Add(_options.Expires),
                 SigningCredentials = new SigningCredentials(
                     _jwksFactory.GetSecretKeys()
                                 .FirstOrDefault(),

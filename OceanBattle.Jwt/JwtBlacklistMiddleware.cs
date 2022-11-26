@@ -29,7 +29,7 @@ namespace OceanBattle.Jwt
         /// <returns><see cref="Task"/> representing <see langword="async"/> operation.</returns>
         public async Task InvokeAsync(HttpContext context, RequestDelegate next)
         {
-            if (await _jwtService.IsTokenBlacklistedAsync(context.User.Claims))
+            if (await _jwtService.IsTokenBlacklistedAsync(context.User.Claims.ToList()))
             { 
                 context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
                 return;

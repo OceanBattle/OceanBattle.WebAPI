@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using OceanBattle.RefreshTokens.Abstractions;
 using OceanBattle.RefreshTokens.DataModel;
@@ -17,6 +18,7 @@ namespace OceanBattle.RefreshTokens.DependencyInjection
             where TContext : RefreshTokenDbContext
         {
             builder.Services.TryAddScoped<RefreshTokenDbContext>(provider => provider.GetRequiredService<TContext>());
+            builder.Services.TryAddTransient<IPasswordHasher<RefreshToken>, PasswordHasher<RefreshToken>>();
             builder.Services.TryAddTransient<IRefreshTokenService, RefreshTokenService>();
             return builder;
         }

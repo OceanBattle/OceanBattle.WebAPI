@@ -18,13 +18,13 @@ namespace OceanBattle.RefreshTokens.DataModel
         public DateTime? ExpirationDate { get; set; }
 
         /// <summary>
-        /// Foreign key to <see cref="OceanBattle.DataModel.User"/> that this token belongs to.
+        /// ID of JSON Web Token corresponding to this refresh token.
         /// </summary>
-        public string? UserId { get; set; }
+        public Guid Jti { get; set; }
 
         /// <summary>
-        /// Navigation property to <see cref="OceanBattle.DataModel.User"/> that this token belongs to.
+        /// ID of User that token is assigned to.
         /// </summary>
-        public User? User { get; set; }
+        public string? UserId { get; set; }
     }
 }

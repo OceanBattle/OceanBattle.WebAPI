@@ -1,12 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using OceanBattle.DataModel;
 using OceanBattle.RefreshTokens.DataModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using OceanBattle.DataModel;
 
 namespace OceanBattle.RefreshTokens
 {
@@ -22,16 +17,17 @@ namespace OceanBattle.RefreshTokens
             base.OnModelCreating(builder);
 
             builder.Entity<RefreshToken>()
-                .HasOne(rt => rt.User)
-                .WithOne()
-                .HasForeignKey<RefreshToken>(rt => rt.UserId)
-                .OnDelete(DeleteBehavior.Cascade);
+                .HasIndex(rt => rt.Jti)
+                .IsUnique();
 
             builder.Entity<RefreshToken>()
                 .HasIndex(rt => rt.UserId)
                 .IsUnique();
         }
 
+        /// <summary>
+        /// Database table containing <see cref="RefreshToken"/> tokens.
+        /// </summary>
         public DbSet<RefreshToken> RefreshTokens { get; set; }
     }
 }

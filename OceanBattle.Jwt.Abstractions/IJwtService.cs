@@ -32,15 +32,15 @@ namespace OceanBattle.Jwt.Abstractions
         /// <summary>
         /// Adds JTI claim of requested JSON Web Token to blacklist (this token will no longer be recognized as valid).
         /// </summary>
-        /// <param name="token">JSON Web Token to be added to blacklist.</param>
+        /// <param name="jti">Id of JSON Web Token to be added to blacklist.</param>
         /// <returns><see cref="Task"/> representing <see langword="async"/> operation.</returns>
-        Task BlacklistTokenAsync(JwtSecurityToken token);
+        Task BlacklistTokenAsync(Guid jti);
 
         /// <summary>
         /// Verifies against the blacklist if JSON Web Token is blacklisted.
         /// </summary>
         /// <param name="claims">Token claims.</param>
         /// <returns><see langword="true"/> if it is blacklisted, <see langword="false"/> if it is not.</returns>
-        Task<bool> IsTokenBlacklistedAsync(IEnumerable<Claim> claims);
+        Task<bool> IsTokenBlacklistedAsync(List<Claim> claims);
     }
 }

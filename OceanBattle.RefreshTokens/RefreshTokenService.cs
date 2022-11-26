@@ -3,11 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using OceanBattle.DataModel;
 using OceanBattle.RefreshTokens.Abstractions;
 using OceanBattle.RefreshTokens.DataModel;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OceanBattle.RefreshTokens
 {
@@ -17,11 +12,11 @@ namespace OceanBattle.RefreshTokens
     public class RefreshTokenService : IRefreshTokenService
     {
         private readonly RefreshTokenDbContext _dbContext;
-        private readonly IPasswordHasher<User> _passwordHasher;
+        private readonly IPasswordHasher<RefreshToken> _passwordHasher;
 
         public RefreshTokenService(
             RefreshTokenDbContext dbContext,
-            IPasswordHasher<User> passwordHasher) 
+            IPasswordHasher<RefreshToken> passwordHasher) 
         {
             _dbContext = dbContext;
             _passwordHasher = passwordHasher;
@@ -30,16 +25,13 @@ namespace OceanBattle.RefreshTokens
         /// <summary>
         /// Revokes issued refresh token (token becomes invalid for future validation attempts).
         /// </summary>
-        /// <param name="user"><see cref="User"/> whose <see cref="RefreshToken"/> is to be revoked.</param> 
-        public async Task RevokeTokenAsync(User user)
+        /// <param name="jti">ID of JSON Web Token corresponding to refresh token that is to be removed.</param>
+        /// <returns><see cref="Task"/> of <see langword="async"/> operation.</returns>
+        public async Task RevokeTokenAsync(Guid jti)
         {
-            RefreshToken? token = 
-                await _dbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.UserId == user.Id);
+            _dbContext.RefreshTokens.RemoveRange(
+                _dbContext.RefreshTokens.Where(rt => rt.Jti == jti));
 
-            if (token is null)
-                return;
-
-            _dbContext.RefreshTokens.Remove(token);
             await _dbContext.SaveChangesAsync();
         }
 
@@ -48,27 +40,17 @@ namespace OceanBattle.RefreshTokens
         /// </summary>
         /// <param name="token">New refresh token.</param>
         /// <returns><see cref="Task"/></returns>
-        public async Task UpdateTokenAsync(RefreshToken token)
+        public async Task AddTokenAsync(RefreshToken token)
         {
             RefreshToken newToken = new RefreshToken
             {
-                Token = _passwordHasher.HashPassword(token.User!, token.Token!),
+                Token = _passwordHasher.HashPassword(token, token.Token!),
                 ExpirationDate = token.ExpirationDate,
-                UserId = token.UserId,
-                User = token.User
+                Jti = token.Jti,
+                UserId = token.UserId
             };
 
-            RefreshToken? oldToken = 
-                await _dbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.UserId == token.UserId);
-
-            if (oldToken is null)
-                _dbContext.RefreshTokens.Add(newToken);
-            else
-            {
-                oldToken.Token = newToken.Token;
-                oldToken.ExpirationDate = newToken.ExpirationDate;
-            }
-
+            _dbContext.RefreshTokens.Add(newToken);
             await _dbContext.SaveChangesAsync();
         }
 
@@ -76,20 +58,33 @@ namespace OceanBattle.RefreshTokens
         /// Validates refresh token.
         /// </summary>
         /// <param name="token">Refresh token to validate.</param>
-        /// <param name="user">User to whom refresh token has been issued.</param>
+        /// <param name="jti">ID of JSON Web Token assigned to this refresh token.</param>
         /// <returns>Returns <see cref="PasswordVerificationResult.Success"/> for valid refresh token, 
         /// <see cref="PasswordVerificationResult.Failed"/> for invalid refresh token.</returns>
-        public async Task<PasswordVerificationResult> ValidateTokenAsync(string token, User user)
+        public async Task<PasswordVerificationResult> ValidateTokenAsync(string token, Guid jti)
         {
             RefreshToken? refreshToken = 
-                await _dbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.UserId == user.Id);
-
+                await _dbContext.RefreshTokens.FirstOrDefaultAsync(rt => rt.Jti == jti);
+            
             if (refreshToken is null || 
                 refreshToken.Token is null ||
                 refreshToken.ExpirationDate < DateTime.Now)
                 return PasswordVerificationResult.Failed;
 
-            return _passwordHasher.VerifyHashedPassword(user, refreshToken.Token!, token);
+            return _passwordHasher.VerifyHashedPassword(refreshToken, refreshToken.Token!, token);
+        }
+
+        /// <summary>
+        /// Revokes all <see cref="RefreshToken"/> tokens assigned to <see cref="User"/>
+        /// </summary>
+        /// <param name="userId">ID of user whose tokens will be revoked.</param>
+        /// <returns><see cref="Task"/> of <see langword="async"/> operation.</returns>
+        public async Task RevokeTokensAsync(string userId)
+        {
+            _dbContext.RefreshTokens.RemoveRange(
+                _dbContext.RefreshTokens.Where(rt => rt.UserId == userId));
+
+            await _dbContext.SaveChangesAsync();
         }
     }
 }

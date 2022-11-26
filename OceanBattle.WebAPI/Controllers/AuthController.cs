@@ -2,9 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Razor.TagHelpers;
 using Microsoft.IdentityModel.Tokens;
-using Microsoft.Net.Http.Headers;
 using OceanBattle.DataModel;
 using OceanBattle.DataModel.DTOs;
 using OceanBattle.Jwks.Abstractions;
@@ -12,6 +10,7 @@ using OceanBattle.Jwt.Abstractions;
 using OceanBattle.RefreshTokens.Abstractions;
 using OceanBattle.RefreshTokens.DataModel;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 
 namespace OceanBattle.Controllers
@@ -93,19 +92,25 @@ namespace OceanBattle.Controllers
             if (!bearerTokenResult.IsValid)
                 return Unauthorized();
 
-            User? user =
-                await _userManager.GetUserAsync(new ClaimsPrincipal(bearerTokenResult.ClaimsIdentity));
-
-            if (user is null)
+            if (!Guid.TryParse(bearerTokenResult.SecurityToken.Id, out Guid jti))
                 return Unauthorized();
 
             PasswordVerificationResult refreshTokenResult =
-                await _refreshTokenService.ValidateTokenAsync(request.RefreshToken!, user);
+                await _refreshTokenService.ValidateTokenAsync(request.RefreshToken!, jti);
 
             if (refreshTokenResult is PasswordVerificationResult.Failed)
                 return Unauthorized();
 
-            AuthResponse authResponse = await CreateAuthResponse(user);
+            if (bearerTokenResult.SecurityToken is not JwtSecurityToken jwt)
+                return Unauthorized();
+
+            await _refreshTokenService.RevokeTokenAsync(jti);
+            await _jwtService.BlacklistTokenAsync(jti);
+
+            AuthResponse? authResponse = await CreateAuthResponse(jwt.Claims.ToList());
+
+            if (authResponse is null)
+                return Unauthorized();
 
             return Ok(authResponse);
         }
@@ -120,14 +125,17 @@ namespace OceanBattle.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            User? user = await _userManager.GetUserAsync(User);
+            Claim? jtiClaim = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti);
+            Claim? idClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
 
-            if (user is null)
+            if (jtiClaim is null || idClaim is null)
+                return Unauthorized();
+
+            if (!Guid.TryParse(jtiClaim.Value, out Guid jti))
                 return BadRequest();
 
-            await _refreshTokenService.RevokeTokenAsync(user);
-            await _jwtService.BlacklistTokenAsync(
-                new JwtSecurityToken(await HttpContext.GetTokenAsync("access_token")));
+            await _refreshTokenService.RevokeTokensAsync(idClaim.Value);
+            await _jwtService.BlacklistTokenAsync(jti);
 
             return Ok();
         }
@@ -144,7 +152,6 @@ namespace OceanBattle.Controllers
                 keys = _jwksFactory.GetPublicKeys()
             });
 
-
         #region private helpers
 
         /// <summary>
@@ -154,18 +161,55 @@ namespace OceanBattle.Controllers
         /// <returns><see cref="AuthResponse"/> instance.</returns>
         private async Task<AuthResponse> CreateAuthResponse(User user)
         {
-            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
-            RefreshToken refreshToken = _refreshTokenFactory.CreateToken(user);
+            JwtSecurityToken jwt = _jwtFactory.CreateToken(user);
+            RefreshToken refreshToken = _refreshTokenFactory.CreateToken(
+                Guid.Parse(jwt.Id),
+                user.Id);
 
-            await _refreshTokenService.UpdateTokenAsync(refreshToken);
+            return await CreateAuthResponse(jwt, refreshToken);
+        }
+
+        /// <summary>
+        /// Creates auth response instance.
+        /// </summary>
+        /// <param name="jwt"><see cref="JwtSecurityToken"/> JSON Web Token.</param>
+        /// <param name="refreshToken"><see cref="RefreshToken"/> refresh token.</param>
+        /// <returns><see cref="AuthResponse"/> instance.</returns>
+        private async Task<AuthResponse> CreateAuthResponse(
+            JwtSecurityToken jwt, 
+            RefreshToken refreshToken)
+        {
+            await _refreshTokenService.AddTokenAsync(refreshToken);
+            JwtSecurityTokenHandler tokenHandler = new JwtSecurityTokenHandler();
 
             AuthResponse response = new AuthResponse
             {
-                BearerToken = tokenHandler.WriteToken(_jwtFactory.CreateToken(user)),
+                BearerToken = tokenHandler.WriteToken(jwt),
                 RefreshToken = refreshToken.Token
             };
 
             return response;
+        }
+
+        /// <summary>
+        /// Creates auth response instance.
+        /// </summary>
+        /// <param name="claims">Collection of claims for creating tokens.</param>
+        /// <returns><see cref="AuthResponse"/> instance.</returns>
+        private async Task<AuthResponse?> CreateAuthResponse(List<Claim> claims)
+        {
+            JwtSecurityToken jwt = _jwtFactory.CreateToken(claims);
+
+            Claim? idClaim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.NameId);
+
+            if (idClaim is null)
+                return null;
+
+            RefreshToken refreshToken = _refreshTokenFactory.CreateToken(
+                Guid.Parse(jwt.Id), 
+                idClaim.Value);
+
+            return await CreateAuthResponse(jwt, refreshToken);
         }
 
         #endregion

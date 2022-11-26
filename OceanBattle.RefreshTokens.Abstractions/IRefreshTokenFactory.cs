@@ -11,8 +11,9 @@ namespace OceanBattle.RefreshTokens.Abstractions
         /// <summary>
         /// Creates new refresh token.
         /// </summary>
-        /// <param name="user">User for whom token is to be created.</param>
+        /// <param name="jti">ID of JSON Web Token to connect with this refresh token.</param>
+        /// <param name="userId">ID of user that token is generated for.</param>
         /// <returns>Newly created refresh token.</returns>
-        RefreshToken CreateToken(User user);
+        RefreshToken CreateToken(Guid jti, string userId);
     }
 }

@@ -29,14 +29,38 @@ namespace OceanBattle.Jwt
         }
 
         /// <summary>
+        /// Creates <see cref="JwtSecurityToken"/> JSON Web Token.
+        /// </summary>
+        /// <param name="claims">Security claims for new <see cref="JwtSecurityToken"/> JSON Web Token.</param>
+        /// <returns>Generated <see cref="JwtSecurityToken"/> representing JSON Web Token.</returns>
+        public JwtSecurityToken CreateToken(List<Claim> claims)
+        {
+            claims.RemoveAll(c => c.Type == JwtRegisteredClaimNames.Jti);
+            claims.Insert(0, new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString("N")));
+
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = DateTime.Now.Add(_options.Expires),
+                SigningCredentials = new SigningCredentials(
+                    _jwksFactory.GetSecretKeys().FirstOrDefault(),
+                    _options.SecurityAlgorithm),
+                Audience = _options.Audience,
+                Issuer = _options.Issuer
+            };
+
+            return tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
+        }
+
+        /// <summary>
         /// Creates JSON Web Token.
         /// </summary>
         /// <param name="user">User that token is generated for.</param>
         /// <returns>Generated <see cref="JwtSecurityToken"/> representing JSON Web Token.</returns>
         public JwtSecurityToken CreateToken(IdentityUser user)
         {
-            var tokenHandler = new JwtSecurityTokenHandler();
-
             List<Claim> defaultClaims = new List<Claim>
             {
                 new Claim(
@@ -44,33 +68,20 @@ namespace OceanBattle.Jwt
                     Guid.NewGuid().ToString("N")),
 
                 new Claim(
-                    ClaimTypes.NameIdentifier, 
+                    JwtRegisteredClaimNames.NameId, 
                     user.Id),
 
                 new Claim(
-                    ClaimTypes.Name, 
+                    JwtRegisteredClaimNames.UniqueName, 
                     user.UserName!)
             };
 
-            List<Claim> roleClaims = new List<Claim>(); 
+            List<Claim> roleClaims = new List<Claim>();
             //(await _userManager.GetRolesAsync(request.User))
             //    .Select(role => new Claim(ClaimTypes.Role, role))
             //    .ToList();
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(defaultClaims.Concat(roleClaims)),
-                Expires = DateTime.Now.Add(_options.Expires),
-                SigningCredentials = new SigningCredentials(
-                    _jwksFactory.GetSecretKeys()
-                                .FirstOrDefault(),
-                    _options.SecurityAlgorithm),
-
-                Audience = _options.Audience,
-                Issuer = _options.Issuer
-            };
-
-            return tokenHandler.CreateJwtSecurityToken(tokenDescriptor);
+            return CreateToken(defaultClaims.Concat(roleClaims).ToList());
         }
     }
 }

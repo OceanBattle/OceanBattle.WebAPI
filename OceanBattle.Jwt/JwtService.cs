@@ -38,9 +38,9 @@ namespace OceanBattle.Jwt
         /// <summary>
         /// Adds JTI claim of requested JSON Web Token to blacklist (this token will no longer be recognized as valid).
         /// </summary>
-        /// <param name="token">JSON Web Token to be added to blacklist.</param>
+        /// <param name="jti">Id of JSON Web Token to be added to blacklist.</param>
         /// <returns><see cref="Task"/> representing <see langword="async"/> operation.</returns>
-        public async Task BlacklistTokenAsync(JwtSecurityToken token)
+        public async Task BlacklistTokenAsync(Guid jti)
         {
             var cacheOptions = new DistributedCacheEntryOptions
             {
@@ -49,8 +49,8 @@ namespace OceanBattle.Jwt
             };
 
             await _cache.SetStringAsync(
-                string.Format("{0}{1}", StringHelpers.BlacklistPath, token.Id), 
-                token.RawData, 
+                string.Format("{0}{1}", StringHelpers.BlacklistPath, jti.ToString("N")), 
+                jti.ToString(), 
                 cacheOptions);
         }
 
@@ -70,7 +70,7 @@ namespace OceanBattle.Jwt
             var result = await tokenHandler.ValidateTokenAsync(token, validationParameters);
 
             if (result.IsValid)
-                result.IsValid = !(await IsTokenBlacklistedAsync((new JwtSecurityToken(token)).Claims));
+                result.IsValid = !(await IsTokenBlacklistedAsync((new JwtSecurityToken(token)).Claims.ToList()));
             
             return result;
         }
@@ -87,7 +87,7 @@ namespace OceanBattle.Jwt
             var result = await tokenHandler.ValidateTokenAsync(token, _tokenValidationParameters);
 
             if (result.IsValid)
-                result.IsValid = !(await IsTokenBlacklistedAsync((new JwtSecurityToken(token)).Claims));
+                result.IsValid = !(await IsTokenBlacklistedAsync((new JwtSecurityToken(token)).Claims.ToList()));
 
             return result;
         }
@@ -97,7 +97,7 @@ namespace OceanBattle.Jwt
         /// </summary>
         /// <param name="claims">Token claims.</param>
         /// <returns><see langword="true"/> if it is blacklisted, <see langword="false"/> if it is not.</returns>
-        public async Task<bool> IsTokenBlacklistedAsync(IEnumerable<Claim> claims)
+        public async Task<bool> IsTokenBlacklistedAsync(List<Claim> claims)
         {
             Claim? claim = claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.Jti);
 

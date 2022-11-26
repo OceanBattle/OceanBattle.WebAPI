@@ -1,0 +1,88 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32922.545
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.WebAPI", "OceanBattle.WebAPI\OceanBattle.WebAPI.csproj", "{7CB896A5-EABE-44AB-BE06-FE6F4B41D3F9}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.DataModel", "DataModel\DataModel\OceanBattle.DataModel.csproj", "{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.Jwt", "OceanBattle.Jwt\OceanBattle.Jwt.csproj", "{386DE126-058F-45D1-B7EC-EA9022BA5979}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Jwks", "Jwks", "{04C3043B-DAF1-4307-B32E-54402CC0B2ED}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.Jwt.Abstractions", "OceanBattle.Jwt.Abstractions\OceanBattle.Jwt.Abstractions.csproj", "{7475151B-360D-4494-B6F3-61347E53836C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Jwt", "Jwt", "{390B27DD-103C-433B-BC4B-C6CE594ED5D2}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.Jwks", "OceanBattle.Jwks\OceanBattle.Jwks.csproj", "{288A5B68-84A7-4FCE-8B16-30EE30555324}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.Jwks.Abstractions", "OceanBattle.Jwks.Abstractions\OceanBattle.Jwks.Abstractions.csproj", "{13862B2E-A85E-4049-9BBC-E3E28C2D2B3B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "RefreshTokens", "RefreshTokens", "{1C2BB87C-5B10-4103-80A0-FAE1AD426C6E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.RefreshTokens.Abstractions", "OceanBattle.RefreshTokens.Abstractions\OceanBattle.RefreshTokens.Abstractions.csproj", "{69E8376C-8A92-47BD-BF7F-0175AB6CE362}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.RefreshTokens.DataModel", "OceanBattle.RefreshTokens.DataModel\OceanBattle.RefreshTokens.DataModel.csproj", "{79A3EC76-5493-454E-B971-EFA16F0EDAAA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.RefreshTokens", "OceanBattle.RefreshTokens\OceanBattle.RefreshTokens.csproj", "{DCE88B2E-2C99-476D-9103-B3D007EF481B}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{7CB896A5-EABE-44AB-BE06-FE6F4B41D3F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7CB896A5-EABE-44AB-BE06-FE6F4B41D3F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7CB896A5-EABE-44AB-BE06-FE6F4B41D3F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7CB896A5-EABE-44AB-BE06-FE6F4B41D3F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}.Release|Any CPU.Build.0 = Release|Any CPU
+		{386DE126-058F-45D1-B7EC-EA9022BA5979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{386DE126-058F-45D1-B7EC-EA9022BA5979}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{386DE126-058F-45D1-B7EC-EA9022BA5979}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{386DE126-058F-45D1-B7EC-EA9022BA5979}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7475151B-360D-4494-B6F3-61347E53836C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7475151B-360D-4494-B6F3-61347E53836C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7475151B-360D-4494-B6F3-61347E53836C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7475151B-360D-4494-B6F3-61347E53836C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{288A5B68-84A7-4FCE-8B16-30EE30555324}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{288A5B68-84A7-4FCE-8B16-30EE30555324}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{288A5B68-84A7-4FCE-8B16-30EE30555324}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{288A5B68-84A7-4FCE-8B16-30EE30555324}.Release|Any CPU.Build.0 = Release|Any CPU
+		{13862B2E-A85E-4049-9BBC-E3E28C2D2B3B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{13862B2E-A85E-4049-9BBC-E3E28C2D2B3B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{13862B2E-A85E-4049-9BBC-E3E28C2D2B3B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{13862B2E-A85E-4049-9BBC-E3E28C2D2B3B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69E8376C-8A92-47BD-BF7F-0175AB6CE362}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69E8376C-8A92-47BD-BF7F-0175AB6CE362}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69E8376C-8A92-47BD-BF7F-0175AB6CE362}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69E8376C-8A92-47BD-BF7F-0175AB6CE362}.Release|Any CPU.Build.0 = Release|Any CPU
+		{79A3EC76-5493-454E-B971-EFA16F0EDAAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{79A3EC76-5493-454E-B971-EFA16F0EDAAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{79A3EC76-5493-454E-B971-EFA16F0EDAAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{79A3EC76-5493-454E-B971-EFA16F0EDAAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCE88B2E-2C99-476D-9103-B3D007EF481B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCE88B2E-2C99-476D-9103-B3D007EF481B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCE88B2E-2C99-476D-9103-B3D007EF481B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCE88B2E-2C99-476D-9103-B3D007EF481B}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{386DE126-058F-45D1-B7EC-EA9022BA5979} = {390B27DD-103C-433B-BC4B-C6CE594ED5D2}
+		{7475151B-360D-4494-B6F3-61347E53836C} = {390B27DD-103C-433B-BC4B-C6CE594ED5D2}
+		{288A5B68-84A7-4FCE-8B16-30EE30555324} = {04C3043B-DAF1-4307-B32E-54402CC0B2ED}
+		{13862B2E-A85E-4049-9BBC-E3E28C2D2B3B} = {04C3043B-DAF1-4307-B32E-54402CC0B2ED}
+		{69E8376C-8A92-47BD-BF7F-0175AB6CE362} = {1C2BB87C-5B10-4103-80A0-FAE1AD426C6E}
+		{79A3EC76-5493-454E-B971-EFA16F0EDAAA} = {1C2BB87C-5B10-4103-80A0-FAE1AD426C6E}
+		{DCE88B2E-2C99-476D-9103-B3D007EF481B} = {1C2BB87C-5B10-4103-80A0-FAE1AD426C6E}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {58F77724-CBD8-44E8-A817-B8D6396DCF2F}
+	EndGlobalSection
+EndGlobal

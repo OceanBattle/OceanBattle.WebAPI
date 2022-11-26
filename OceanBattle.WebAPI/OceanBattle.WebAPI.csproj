@@ -9,6 +9,21 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Abstractions\**" />
+    <Compile Remove="Auth\**" />
+    <Compile Remove="Options\**" />
+    <Content Remove="Abstractions\**" />
+    <Content Remove="Auth\**" />
+    <Content Remove="Options\**" />
+    <EmbeddedResource Remove="Abstractions\**" />
+    <EmbeddedResource Remove="Auth\**" />
+    <EmbeddedResource Remove="Options\**" />
+    <None Remove="Abstractions\**" />
+    <None Remove="Auth\**" />
+    <None Remove="Options\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="7.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="7.0.0" />
@@ -32,12 +47,6 @@
     <ProjectReference Include="..\OceanBattle.Jwt\OceanBattle.Jwt.csproj" />
     <ProjectReference Include="..\OceanBattle.RefreshTokens.DataModel\OceanBattle.RefreshTokens.DataModel.csproj" />
     <ProjectReference Include="..\OceanBattle.RefreshTokens\OceanBattle.RefreshTokens.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Abstractions\" />
-    <Folder Include="Auth\" />
-    <Folder Include="Options\" />
   </ItemGroup>
 
 </Project>

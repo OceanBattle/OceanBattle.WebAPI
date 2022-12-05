@@ -5,8 +5,6 @@ VisualStudioVersion = 17.3.32922.545
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.WebAPI", "OceanBattle.WebAPI\OceanBattle.WebAPI.csproj", "{7CB896A5-EABE-44AB-BE06-FE6F4B41D3F9}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.DataModel", "DataModel\DataModel\OceanBattle.DataModel.csproj", "{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.Jwt", "OceanBattle.Jwt\OceanBattle.Jwt.csproj", "{386DE126-058F-45D1-B7EC-EA9022BA5979}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Jwks", "Jwks", "{04C3043B-DAF1-4307-B32E-54402CC0B2ED}"
@@ -29,6 +27,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.RefreshTokens",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.Game", "OceanBattle.Game\OceanBattle.Game.csproj", "{EC582A46-8A14-458C-8089-90A8175C21C9}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OceanBattle.DataModel", "OceanBattle.DataModel\DataModel\OceanBattle.DataModel.csproj", "{63EF5E3C-B59C-4C1A-BA92-A8B87C0ACE1D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,10 +39,6 @@ Global
 		{7CB896A5-EABE-44AB-BE06-FE6F4B41D3F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7CB896A5-EABE-44AB-BE06-FE6F4B41D3F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7CB896A5-EABE-44AB-BE06-FE6F4B41D3F9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9C029B8B-1F15-439E-B1A4-4AB8AE23F989}.Release|Any CPU.Build.0 = Release|Any CPU
 		{386DE126-058F-45D1-B7EC-EA9022BA5979}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{386DE126-058F-45D1-B7EC-EA9022BA5979}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{386DE126-058F-45D1-B7EC-EA9022BA5979}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -75,6 +71,10 @@ Global
 		{EC582A46-8A14-458C-8089-90A8175C21C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{EC582A46-8A14-458C-8089-90A8175C21C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{EC582A46-8A14-458C-8089-90A8175C21C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{63EF5E3C-B59C-4C1A-BA92-A8B87C0ACE1D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63EF5E3C-B59C-4C1A-BA92-A8B87C0ACE1D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63EF5E3C-B59C-4C1A-BA92-A8B87C0ACE1D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63EF5E3C-B59C-4C1A-BA92-A8B87C0ACE1D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

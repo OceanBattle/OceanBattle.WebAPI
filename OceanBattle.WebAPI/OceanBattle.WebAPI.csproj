@@ -43,7 +43,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\DataModel\DataModel\OceanBattle.DataModel.csproj" />
+    <ProjectReference Include="..\OceanBattle.DataModel\DataModel\OceanBattle.DataModel.csproj" />
     <ProjectReference Include="..\OceanBattle.Jwt\OceanBattle.Jwt.csproj" />
     <ProjectReference Include="..\OceanBattle.RefreshTokens.DataModel\OceanBattle.RefreshTokens.DataModel.csproj" />
     <ProjectReference Include="..\OceanBattle.RefreshTokens\OceanBattle.RefreshTokens.csproj" />

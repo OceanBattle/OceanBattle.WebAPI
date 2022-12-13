@@ -12,8 +12,8 @@ namespace OceanBattle.Game.Models
     {
         private readonly IBattlefieldFactory _battleFieldFactory;
 
-        private Subject<Unit> _completed = new();
-        public IObservable<Unit> Completed => _completed.AsObservable();
+        private Subject<ISession> _completed = new();
+        public IObservable<ISession> Completed => _completed.AsObservable();
 
         public bool IsActive => 
             Oponent != null &&
@@ -70,7 +70,7 @@ namespace OceanBattle.Game.Models
 
         private void OnBattlefieldDestroyed(IBattlefield battlefield)
         {
-            _completed.OnNext(Unit.Default);
+            _completed.OnNext(this);
             _completed.OnCompleted();
         }
 

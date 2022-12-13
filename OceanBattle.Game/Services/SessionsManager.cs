@@ -2,6 +2,7 @@
 using OceanBattle.DataModel.Game;
 using OceanBattle.Game.Abstractions;
 using OceanBattle.Game.Models;
+using System.Reactive.Linq;
 
 namespace OceanBattle.Game.Services
 {
@@ -20,9 +21,23 @@ namespace OceanBattle.Game.Services
         public ISession CreateSession(User creator, Level level)
         {
             ISession session = _sessionFactory.Create(creator, level.BattlefieldSize);
+
+            session.Completed
+                .Take(1)
+                .Subscribe(OnSessionCompleted);
+
             _sessions.Add(session);
 
             return session;
         }
+
+        #region private helpers
+
+        private void OnSessionCompleted(ISession session)
+        {
+            _sessions.Remove(session);
+        }
+
+        #endregion
     }
 }

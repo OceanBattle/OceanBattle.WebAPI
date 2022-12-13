@@ -2,12 +2,18 @@
 using OceanBattle.DataModel.Game;
 using OceanBattle.DataModel.Game.Abstractions;
 using OceanBattle.Game.Abstractions;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace OceanBattle.Game.Models
 {
     public class Session : ISession
     {
         private readonly IBattlefieldFactory _battleFieldFactory;
+
+        private Subject<Unit> _completed = new();
+        public IObservable<Unit> Completed => _completed.AsObservable();
 
         public bool IsActive => 
             Oponent != null &&
@@ -29,20 +35,45 @@ namespace OceanBattle.Game.Models
             BattlefieldSize = battlefieldSize;
             _battleFieldFactory = battlefieldFactory;
 
-            IBattlefield battlefield = _battleFieldFactory.Create(battlefieldSize, battlefieldSize);
-            battlefield.Owner = Creator;
-
-            Battlefields = new IBattlefield?[2] { battlefield, null };
+            Battlefields = new IBattlefield?[2] 
+            { 
+                CreateBattlefield(creator, BattlefieldSize), 
+                null 
+            };
         }
 
         public void AddOponent(User oponent)
         {
             Oponent = oponent;
+            Battlefields[1] = CreateBattlefield(oponent, BattlefieldSize);
+        }
 
-            IBattlefield battlefield = _battleFieldFactory.Create(BattlefieldSize, BattlefieldSize);
-            battlefield.Owner = oponent;
+        #region private helpers
+       
+        private IBattlefield CreateBattlefield(User player, int size)
+        {
+            IBattlefield battlefield = _battleFieldFactory.Create(size, size);
+            battlefield.Owner = player;
 
-            Battlefields[1] = battlefield;
-        } 
+            battlefield.GotHit.Subscribe(
+                    (coordinates) => OnBattlefieldHit(coordinates, battlefield), 
+                    () => OnBattlefieldDestroyed(battlefield));
+
+            return battlefield;
+        }
+
+        private void OnBattlefieldHit(
+            (int x, int y) coordinates, 
+            IBattlefield battlefield)
+        {
+        }
+
+        private void OnBattlefieldDestroyed(IBattlefield battlefield)
+        {
+            _completed.OnNext(Unit.Default);
+            _completed.OnCompleted();
+        }
+
+        #endregion
     }
 }

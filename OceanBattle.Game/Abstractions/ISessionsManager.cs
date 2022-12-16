@@ -10,7 +10,7 @@ namespace OceanBattle.Game.Abstractions
 {
     public interface ISessionsManager
     {
-        IEnumerable<ISession> Sessions { get; }
-        ISession CreateSession(User creator, Level level);
+        IEnumerable<IGameSession> Sessions { get; }
+        IGameSession CreateSession(User creator, Level level);
     }
 }

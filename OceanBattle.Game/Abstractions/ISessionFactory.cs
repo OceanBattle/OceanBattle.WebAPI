@@ -9,6 +9,6 @@ namespace OceanBattle.Game.Abstractions
 {
     public interface ISessionFactory
     {
-        ISession Create(User creator, int battleFieldSize);
+        IGameSession Create(User creator, int battleFieldSize);
     }
 }

@@ -16,7 +16,7 @@ namespace OceanBattle.Game.Tests
             User creator = new User();
             Level level = new Level { BattlefieldSize = size };
 
-            var sessionMock = new Mock<ISession>(MockBehavior.Strict);
+            var sessionMock = new Mock<IGameSession>(MockBehavior.Strict);
             
             var factoryMock = new Mock<ISessionFactory>(MockBehavior.Strict);
             factoryMock.Setup(factory => factory.Create(creator, size)).Returns(sessionMock.Object);

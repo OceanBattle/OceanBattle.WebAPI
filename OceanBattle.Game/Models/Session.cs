@@ -8,12 +8,13 @@ using System.Reactive.Subjects;
 
 namespace OceanBattle.Game.Models
 {
-    public class Session : ISession
+    public class Session : IGameSession
     {
         private readonly IBattlefieldFactory _battleFieldFactory;
+        private readonly IGameInterface _gameInterface;
 
-        private Subject<ISession> _completed = new();
-        public IObservable<ISession> Completed => _completed.AsObservable();
+        private Subject<IGameSession> _completed = new();
+        public IObservable<IGameSession> Completed => _completed.AsObservable();
 
         public bool IsActive => 
             Oponent != null &&
@@ -29,11 +30,13 @@ namespace OceanBattle.Game.Models
         public Session(
             User creator, 
             int battlefieldSize,
-            IBattlefieldFactory battlefieldFactory)
+            IBattlefieldFactory battlefieldFactory,
+            IGameInterface gameInterface)
         {
             Creator = creator;
             BattlefieldSize = battlefieldSize;
             _battleFieldFactory = battlefieldFactory;
+            _gameInterface = gameInterface;
 
             Battlefields = new IBattlefield?[2] 
             { 
@@ -44,8 +47,13 @@ namespace OceanBattle.Game.Models
 
         public void AddOponent(User oponent)
         {
+            if (IsActive)
+                return;
+
             Oponent = oponent;
             Battlefields[1] = CreateBattlefield(oponent, BattlefieldSize);
+
+            _gameInterface.DeploymentStarted(this);
         }
 
         #region private helpers
@@ -66,12 +74,15 @@ namespace OceanBattle.Game.Models
             (int x, int y) coordinates, 
             IBattlefield battlefield)
         {
+            _gameInterface.GotHit(this, battlefield.Owner!, coordinates);
         }
 
         private void OnBattlefieldDestroyed(IBattlefield battlefield)
         {
             _completed.OnNext(this);
             _completed.OnCompleted();
+
+            _gameInterface.GameEnded(this);
         }
 
         #endregion

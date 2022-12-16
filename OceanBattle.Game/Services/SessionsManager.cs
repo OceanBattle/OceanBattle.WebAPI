@@ -10,17 +10,17 @@ namespace OceanBattle.Game.Services
     {
         private readonly ISessionFactory _sessionFactory;
         
-        private List<ISession> _sessions = new List<ISession>();
-        public IEnumerable<ISession> Sessions => _sessions.AsEnumerable();
+        private List<IGameSession> _sessions = new List<IGameSession>();
+        public IEnumerable<IGameSession> Sessions => _sessions.AsEnumerable();
 
         public SessionsManager(ISessionFactory sessionFactory)
         {
             _sessionFactory = sessionFactory;
         }
 
-        public ISession CreateSession(User creator, Level level)
+        public IGameSession CreateSession(User creator, Level level)
         {
-            ISession session = _sessionFactory.Create(creator, level.BattlefieldSize);
+            IGameSession session = _sessionFactory.Create(creator, level.BattlefieldSize);
 
             session.Completed
                 .Take(1)
@@ -33,7 +33,7 @@ namespace OceanBattle.Game.Services
 
         #region private helpers
 
-        private void OnSessionCompleted(ISession session)
+        private void OnSessionCompleted(IGameSession session)
         {
             _sessions.Remove(session);
         }

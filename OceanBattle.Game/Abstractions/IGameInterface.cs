@@ -50,5 +50,13 @@ namespace OceanBattle.Game.Abstractions
         /// <param name="session">Session of this game.</param>
         /// <returns></returns>
         Task DeploymentFinished(IGameSession session);
+
+        /// <summary>
+        /// Sends invite to player.
+        /// </summary>
+        /// <param name="recieverId">Uniqe Id of <see cref="User"/> that is invited.</param>
+        /// <param name="sender"><see cref="User"/> that sent an invite.</param>
+        /// <returns></returns>
+        Task SendInvite(string recieverId, User sender);
     }
 }

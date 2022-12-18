@@ -19,31 +19,31 @@ namespace OceanBattle.Game.Repositories
                 new Level
                 {
                     BattlefieldSize = 8,
-                    AvailableTypes = new (Type type, int maxAmount)[]
+                    AvailableTypes = new Dictionary<Type, int>
                     {
-                        (typeof(Corvette), 4),
-                        (typeof(Frigate), 1)
+                        { typeof(Corvette), 4 },
+                        { typeof(Frigate), 1 }
                     }
                 },
 
                 new Level
                 {
                     BattlefieldSize = 10,
-                    AvailableTypes = new (Type type, int maxAmount)[]
+                    AvailableTypes = new Dictionary<Type, int>
                     {
-                        (typeof(Corvette), 4),
-                        (typeof(Frigate), 2)
+                        { typeof(Corvette), 4 },
+                        { typeof(Frigate), 2 }
                     }
                 },
 
                 new Level
                 {
                     BattlefieldSize = 12,
-                    AvailableTypes = new (Type type, int maxAmount)[]
+                    AvailableTypes = new Dictionary<Type, int>
                     {
-                        (typeof(Corvette), 4),
-                        (typeof(Frigate), 2),
-                        (typeof(Destroyer), 1)
+                        { typeof(Corvette), 4 },
+                        { typeof(Frigate), 2 },
+                        { typeof(Destroyer), 1 }
                     }
                 }
             };

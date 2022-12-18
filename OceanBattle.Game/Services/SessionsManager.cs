@@ -9,18 +9,31 @@ namespace OceanBattle.Game.Services
     public class SessionsManager : ISessionsManager
     {
         private readonly ISessionFactory _sessionFactory;
-        
+        private readonly IPlayersManager _playersManager;
+
         private List<IGameSession> _sessions = new List<IGameSession>();
         public IEnumerable<IGameSession> Sessions => _sessions.AsEnumerable();
 
-        public SessionsManager(ISessionFactory sessionFactory)
+        public SessionsManager(
+            ISessionFactory sessionFactory,
+            IPlayersManager playersManager)
         {
             _sessionFactory = sessionFactory;
+            _playersManager = playersManager;
         }
 
-        public IGameSession CreateSession(User creator, Level level)
+        public IGameSession? CreateSession(string creatorId, Level level)
         {
-            IGameSession session = _sessionFactory.Create(creator, level.BattlefieldSize);
+            if (_sessions.Any(s => s.Creator.Id == creatorId || 
+                (s.Oponent is not null && s.Oponent.Id == creatorId)))
+                return null;
+
+            User? creator = _playersManager.GetPlayer(creatorId);
+
+            if (creator is null)
+                return null;
+
+            IGameSession session = _sessionFactory.Create(creator, level);
 
             session.Completed
                 .Take(1)
@@ -30,6 +43,20 @@ namespace OceanBattle.Game.Services
 
             return session;
         }
+
+        public IGameSession? CreateSession(User creator, Level level)
+            => CreateSession(creator.Id, level);
+
+        public IGameSession? FindSession(User participant)
+            => FindSession(participant.Id);
+
+        public IGameSession? FindSession(string participantId) 
+            => _sessions.FirstOrDefault(session 
+                => session.Battlefields.Any(battlefield 
+                    => battlefield is not null && 
+                       battlefield.Owner is not null && 
+                       battlefield.Owner.Id == participantId));
+        
 
         #region private helpers
 

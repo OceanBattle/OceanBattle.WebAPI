@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
-using Microsoft.Identity.Client;
 using OceanBattle.DataModel;
 using OceanBattle.DataModel.ClientData;
 using OceanBattle.DataModel.DTOs;
 using OceanBattle.DataModel.Game;
 using OceanBattle.DataModel.Game.Abstractions;
+using OceanBattle.DataModel.Game.Exceptions;
 using OceanBattle.Game.Abstractions;
 
 namespace OceanBattle.WebAPI.Hubs
@@ -28,99 +28,150 @@ namespace OceanBattle.WebAPI.Hubs
             _userManager = userManager;
         }
         
-        public async Task Hit(int x, int y, Weapon weapon)
+        public bool CanBeHit(int x, int y)
         {
+            IBattlefield? battlefield = GetBattlefield();
 
+            if (battlefield is null)
+                return false;
+
+            return battlefield.CanBeHit(x, y);
         }
 
-        public async Task PlaceShip(int x, int y, Ship ship)
+        public BattlefieldDto Hit(int x, int y, Weapon weapon)
         {
-
-        }
-
-        public async Task<IBattlefield?> AcceptInvite(UserDto? inviteSender)
-        {
-            if (Context.User is null)
-                throw new UnauthorizedAccessException();
-
-            if (inviteSender is null)
-                return null;
-
-            User? user = await _userManager.GetUserAsync(Context.User);
-
-            if (user is null)
-                throw new NotImplementedException();
-
             IGameSession? session = 
-                _sessionsManager.Sessions.FirstOrDefault(s => s.Creator.Email == inviteSender.Email);
+                _sessionsManager.FindSession(Context.UserIdentifier!);
 
             if (session is null)
-                return null;
+                throw new SessionNotFoundException(
+                    "Player is not involved in any game session.");
 
-            session.AddOponent(user);
+            if (!session.IsActive)
+                throw new SessionInactiveException(
+                    "Session is not active.");
 
-            return session.Battlefields[1];
+            IBattlefield? battlefield = 
+                session.GetOponentBattlefield(Context.UserIdentifier!);
+
+            if (battlefield is null)
+                throw new OponentNotFoundException(
+                    "Player does not have any oponent.");
+
+            if (!battlefield.Hit(x, y, weapon))
+                throw new InvalidHitException();
+
+            return new BattlefieldDto
+            {
+                Grid = battlefield.AnonimizedGrid,
+                Ships = battlefield.AnonimizedShips
+            };
         }
 
-        public async Task InvitePlayer(UserDto player)
+        public void ConfirmReady() 
+            => _playersManager.ConfirmReady(Context.UserIdentifier!);
+        
+        public bool CanPlaceShip(int x, int y, Ship ship)
         {
-            if (Context.User is null)
-                throw new UnauthorizedAccessException();
+            IBattlefield? battlefield = GetBattlefield();
 
-            User? invitedPlayer = 
-                _playersManager.ActivePlayers.FirstOrDefault(p => p.Email == player.Email);
-            User? sender = await _userManager.GetUserAsync(Context.User);
+            if (battlefield is null)
+                return false;
 
-            if (sender is null)
-                throw new UnauthorizedAccessException();
-
-            if (invitedPlayer is null)
-                return;
-
-            await Clients.User(invitedPlayer.Id)
-                .InviteAsync(new UserDto 
-                { 
-                    Email = sender.Email, 
-                    UserName = sender.UserName 
-                });
+            return battlefield.CanPlaceShip(x, y, ship);
         }
 
-        public async Task<IBattlefield> CreateSession(Level level)
+        public BattlefieldDto PlaceShip(int x, int y, Ship ship)
         {
-            if (Context.User is null)
-                throw new UnauthorizedAccessException();
+            IBattlefield? battlefield = GetBattlefield();
 
-            User? user = await _userManager.GetUserAsync(Context.User);
+            if (battlefield is null)
+                throw new SessionNotFoundException(
+                    "Battlefield does not exist.");
 
-            if (user is null)
-                throw new UnauthorizedAccessException();
+            if (!battlefield.PlaceShip(x, y, ship))
+                throw new InvalidPlacementException(
+                    "Cannot place unit.");
 
-            IGameSession session = _sessionsManager.CreateSession(user, level);
+            return new BattlefieldDto
+            {
+                Grid = battlefield.Grid,
+                Ships = battlefield.Ships
+            };
+        }
+
+        public IBattlefield AcceptInvite(UserDto inviteSender)
+        {
+            IBattlefield? battlefield = 
+                _playersManager.AcceptInvite(Context.UserIdentifier!, inviteSender);
+
+            if (battlefield is null)
+                throw new SessionNotFoundException(
+                    "Session does not exist.");
+
+            return battlefield;
+        }
+
+        public void InvitePlayer(UserDto player)
+        {
+            _playersManager.InvitePlayer(player, Context.UserIdentifier!);
+            //await Clients.User(invitedPlayer.Id)
+            //    .InviteAsync(new UserDto 
+            //    { 
+            //        Email = sender.Email, 
+            //        UserName = sender.UserName 
+            //    });
+        }
+
+        public IBattlefield CreateSession(Level level)
+        {         
+            IGameSession? session = 
+                _sessionsManager.CreateSession(Context.UserIdentifier!, level);
+
+            if (session is null)
+                throw new PlayerInvolvedInAnotherSessionException(
+                    "Player is involved in another session.");
 
             return session.Battlefields[0]!;
         }
 
         public async Task MakeActive()
         {
-            if (Context.User is null)
-                throw new UnauthorizedAccessException();
-
-            User? user = await _userManager.GetUserAsync(Context.User);
-
-            if (user is null)
-                throw new UnauthorizedAccessException();
-
+            User user = await GetCurrentUserAsync();
             _playersManager.AddAsActive(user);
-
-            await Clients.Others.UpdateActiveUsersAsync(
-                _playersManager.ActivePlayers.Select(u => new UserDto 
-                { 
-                    Email = u.Email, 
-                    UserName = u.UserName 
-                }));
+            await UpdateActiveUsersAsync();
         }
 
         public async Task MakeInactive()
+        {
+            _playersManager.RemoveFromActive(Context.UserIdentifier!);
+            await UpdateActiveUsersAsync();
+        }
+
+        #region private helpers
+
+        private IBattlefield? GetBattlefield()
+        {
+            IGameSession? session = 
+                _sessionsManager.FindSession(Context.UserIdentifier!);
+
+            if (session is null)
+                return null;
+
+            IBattlefield? battlefield = 
+                session.GetBattlefield(Context.UserIdentifier!);
+
+            return battlefield;
+        }
+
+        private async Task UpdateActiveUsersAsync() 
+            => await Clients.Others.UpdateActiveUsersAsync(_playersManager.ActivePlayers.Select(u => new UserDto 
+            {
+                Email = u.Email,
+                UserName = u.UserName 
+            }));
+        
+        private async Task<User> GetCurrentUserAsync()
         {
             if (Context.User is null)
                 throw new UnauthorizedAccessException();
@@ -130,14 +181,9 @@ namespace OceanBattle.WebAPI.Hubs
             if (user is null)
                 throw new UnauthorizedAccessException();
 
-            _playersManager.RemoveFromActive(user);
-
-            await Clients.Others.UpdateActiveUsersAsync(
-                _playersManager.ActivePlayers.Select(u => new UserDto 
-                {
-                    Email = u.Email,
-                    UserName = u.UserName
-                }));
+            return user;
         }
+
+        #endregion
     }
 }

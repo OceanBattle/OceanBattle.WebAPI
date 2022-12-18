@@ -1,4 +1,6 @@
-﻿using OceanBattle.DataModel;
+﻿using Moq;
+using OceanBattle.DataModel;
+using OceanBattle.Game.Abstractions;
 using OceanBattle.Game.Services;
 
 namespace OceanBattle.Game.Tests
@@ -9,7 +11,11 @@ namespace OceanBattle.Game.Tests
         public void AddAsActive_ShouldSucceed()
         {
             // Arrange
-            PlayersManager playersManager = new PlayersManager();
+            var sessionsManagerMock = new Mock<ISessionsManager>(MockBehavior.Strict);
+
+            var interfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+
+            PlayersManager playersManager = new PlayersManager(interfaceMock.Object, sessionsManagerMock.Object);
             User user1 = new User();
             User user2 = new User();
 
@@ -29,7 +35,11 @@ namespace OceanBattle.Game.Tests
         {
             // Arrange
             User user = new User();
-            PlayersManager playersManager = new PlayersManager();
+            var sessionsManagerMock = new Mock<ISessionsManager>(MockBehavior.Strict);
+
+            var interfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+
+            PlayersManager playersManager = new PlayersManager(interfaceMock.Object, sessionsManagerMock.Object);
             playersManager.AddAsActive(user);
 
             // Act

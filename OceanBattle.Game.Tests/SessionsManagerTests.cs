@@ -3,6 +3,8 @@ using OceanBattle.DataModel;
 using OceanBattle.DataModel.Game;
 using OceanBattle.Game.Abstractions;
 using OceanBattle.Game.Services;
+using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace OceanBattle.Game.Tests
 {
@@ -17,11 +19,15 @@ namespace OceanBattle.Game.Tests
             Level level = new Level { BattlefieldSize = size };
 
             var sessionMock = new Mock<IGameSession>(MockBehavior.Strict);
-            
-            var factoryMock = new Mock<ISessionFactory>(MockBehavior.Strict);
-            factoryMock.Setup(factory => factory.Create(creator, size)).Returns(sessionMock.Object);
+            sessionMock.SetupGet(session => session.Completed).Returns(new Subject<IGameSession>().AsObservable());
 
-            SessionsManager sessionsManager = new SessionsManager(factoryMock.Object);
+            var factoryMock = new Mock<ISessionFactory>(MockBehavior.Strict);
+            factoryMock.Setup(factory => factory.Create(creator, level)).Returns(sessionMock.Object);
+
+            var managerMock = new Mock<IPlayersManager>(MockBehavior.Strict);
+            managerMock.Setup(manager => manager.GetPlayer(creator.Id)).Returns(creator);
+
+            SessionsManager sessionsManager = new SessionsManager(factoryMock.Object, managerMock.Object);
 
             // Act
             var actual = sessionsManager.CreateSession(creator, level);

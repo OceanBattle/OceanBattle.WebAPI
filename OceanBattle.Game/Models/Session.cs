@@ -16,10 +16,11 @@ namespace OceanBattle.Game.Models
         private Subject<IGameSession> _completed = new();
         public IObservable<IGameSession> Completed => _completed.AsObservable();
 
-        public bool IsActive => 
+        public Level Level { get; private set; }
+
+        public bool IsActive =>
             Oponent != null &&
-            Battlefields[0]!.Ships.Any(ship => !ship.IsDestroyed) && 
-            Battlefields[1]!.Ships.Any(ship => !ship.IsDestroyed);
+            Battlefields.All(b => b!.IsReady && b!.Ships.Any(ship => !ship.IsDestroyed));
 
         public int BattlefieldSize { get; private set; }
         public IBattlefield?[] Battlefields { get; private set; }
@@ -29,12 +30,13 @@ namespace OceanBattle.Game.Models
 
         public Session(
             User creator, 
-            int battlefieldSize,
+            Level level,
             IBattlefieldFactory battlefieldFactory,
             IGameInterface gameInterface)
         {
+            Level = level;
             Creator = creator;
-            BattlefieldSize = battlefieldSize;
+            BattlefieldSize = level.BattlefieldSize;
             _battleFieldFactory = battlefieldFactory;
             _gameInterface = gameInterface;
 
@@ -56,8 +58,26 @@ namespace OceanBattle.Game.Models
             _gameInterface.DeploymentStarted(this);
         }
 
+        public IBattlefield? GetBattlefield(User player)
+            => GetBattlefield(player.Id);
+
+        public IBattlefield? GetBattlefield(string playerId)
+            => Battlefields.First(b => 
+            b is not null && 
+            b.Owner is not null && 
+            b.Owner.Id == playerId);
+
+        public IBattlefield? GetOponentBattlefield(User player)
+            => GetOponentBattlefield(player.Id);
+
+        public IBattlefield? GetOponentBattlefield(string playerId) 
+            => Battlefields.First(b => 
+            b is not null && 
+            b.Owner is not null && 
+            b.Owner.Id != playerId); 
+
         #region private helpers
-       
+
         private IBattlefield CreateBattlefield(User player, int size)
         {
             IBattlefield battlefield = _battleFieldFactory.Create(size, size);

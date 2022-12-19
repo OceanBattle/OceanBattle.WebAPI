@@ -25,6 +25,8 @@ namespace OceanBattle.Game.Models
         public int BattlefieldSize { get; private set; }
         public IBattlefield?[] Battlefields { get; private set; }
 
+        public User? Next { get; private set; }
+
         public User Creator { get; private set; }
         public User? Oponent { get; private set; }
 
@@ -55,26 +57,26 @@ namespace OceanBattle.Game.Models
             Oponent = oponent;
             Battlefields[1] = CreateBattlefield(oponent, BattlefieldSize);
 
-            _gameInterface.DeploymentStarted(this);
+            _gameInterface.StartDeployment(this);
         }
 
         public IBattlefield? GetBattlefield(User player)
             => GetBattlefield(player.Id);
 
         public IBattlefield? GetBattlefield(string playerId)
-            => Battlefields.First(b => 
-            b is not null && 
-            b.Owner is not null && 
-            b.Owner.Id == playerId);
+            => Battlefields.First(b 
+                => b is not null && 
+                   b.Owner is not null && 
+                   b.Owner.Id == playerId);
 
         public IBattlefield? GetOponentBattlefield(User player)
             => GetOponentBattlefield(player.Id);
 
         public IBattlefield? GetOponentBattlefield(string playerId) 
-            => Battlefields.First(b => 
-            b is not null && 
-            b.Owner is not null && 
-            b.Owner.Id != playerId); 
+            => Battlefields.First(b 
+                => b is not null && 
+                   b.Owner is not null && 
+                   b.Owner.Id != playerId); 
 
         #region private helpers
 
@@ -95,14 +97,16 @@ namespace OceanBattle.Game.Models
             IBattlefield battlefield)
         {
             _gameInterface.GotHit(this, battlefield.Owner!, coordinates);
+            Next = battlefield.Owner;
         }
 
         private void OnBattlefieldDestroyed(IBattlefield battlefield)
         {
             _completed.OnNext(this);
             _completed.OnCompleted();
+            Next = null;
 
-            _gameInterface.GameEnded(this);
+            _gameInterface.EndGame(this);
         }
 
         #endregion

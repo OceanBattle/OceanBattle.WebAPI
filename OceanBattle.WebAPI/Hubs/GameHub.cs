@@ -51,6 +51,9 @@ namespace OceanBattle.WebAPI.Hubs
                 throw new SessionInactiveException(
                     "Session is not active.");
 
+            if (session.Next is null || session.Next.Id != Context.UserIdentifier!)
+                throw new NotYourTurnException("It is Your oponent's turn to play.");
+
             IBattlefield? battlefield = 
                 session.GetOponentBattlefield(Context.UserIdentifier!);
 

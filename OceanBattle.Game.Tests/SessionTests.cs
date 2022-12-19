@@ -77,7 +77,7 @@ namespace OceanBattle.Game.Tests
                 factoryMock.Object, 
                 gameInterfaceMock.Object);
 
-            gameInterfaceMock.Setup(gameInterface => gameInterface.DeploymentStarted(session))
+            gameInterfaceMock.Setup(gameInterface => gameInterface.StartDeployment(session))
                 .Returns(Task.CompletedTask);
 
             User oponent = new User();
@@ -86,7 +86,7 @@ namespace OceanBattle.Game.Tests
             session.AddOponent(oponent);
 
             // Assert
-            gameInterfaceMock.Verify(gI => gI.DeploymentStarted(session), Times.Once());
+            gameInterfaceMock.Verify(gI => gI.StartDeployment(session), Times.Once());
             Assert.Equal(oponent, session.Oponent);
             Assert.NotNull(session.Battlefields[1]);
             Assert.Equal(oponent, session.Battlefields[1]!.Owner);
@@ -130,7 +130,7 @@ namespace OceanBattle.Game.Tests
                 factoryMock.Object, 
                 gameInterfaceMock.Object);
 
-            gameInterfaceMock.Setup(gameInterface => gameInterface.DeploymentStarted(session))
+            gameInterfaceMock.Setup(gameInterface => gameInterface.StartDeployment(session))
                 .Returns(Task.CompletedTask);
 
             session.AddOponent(oponent);
@@ -183,7 +183,7 @@ namespace OceanBattle.Game.Tests
                 factoryMock.Object, 
                 gameInterfaceMock.Object);
 
-            gameInterfaceMock.Setup(gameInterface => gameInterface.DeploymentStarted(session))
+            gameInterfaceMock.Setup(gameInterface => gameInterface.StartDeployment(session))
                 .Returns(Task.CompletedTask);
 
             session.AddOponent(oponent);
@@ -228,7 +228,7 @@ namespace OceanBattle.Game.Tests
                 factoryMock.Object, 
                 gameInterfaceMock.Object);
 
-            gameInterfaceMock.Setup(gameInterface => gameInterface.DeploymentStarted(session))
+            gameInterfaceMock.Setup(gameInterface => gameInterface.StartDeployment(session))
                 .Returns(Task.CompletedTask);
 
             session.Battlefields[0]!.IsReady = true;

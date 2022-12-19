@@ -16,7 +16,7 @@ namespace OceanBattle.Game.Abstractions
         /// Sends information about game end to game interface.
         /// </summary>
         /// <param name="session">Session of this game.</param>
-        Task GameEnded(IGameSession session);
+        Task EndGame(IGameSession session);
 
         /// <summary>
         /// Sends information about being hit to game interface.
@@ -33,7 +33,7 @@ namespace OceanBattle.Game.Abstractions
         /// Sends information about start of game to game interface.
         /// </summary>
         /// <param name="session">Session of this game.</param>
-        Task GameStarted(IGameSession session);
+        Task StartGame(IGameSession session);
 
         /// <summary>
         /// Sends information about start of deployment of units on battlefield
@@ -41,7 +41,7 @@ namespace OceanBattle.Game.Abstractions
         /// </summary>
         /// <param name="session">Session of this game.</param>
         /// <returns></returns>
-        Task DeploymentStarted(IGameSession session);
+        Task StartDeployment(IGameSession session);
 
         /// <summary>
         /// Sends information about completion of deployment of units on battlefield
@@ -49,7 +49,7 @@ namespace OceanBattle.Game.Abstractions
         /// </summary>
         /// <param name="session">Session of this game.</param>
         /// <returns></returns>
-        Task DeploymentFinished(IGameSession session);
+        Task FinishDeployment(IGameSession session);
 
         /// <summary>
         /// Sends invite to player.

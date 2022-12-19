@@ -25,6 +25,11 @@ namespace OceanBattle.Game.Abstractions
         bool IsActive { get; }
 
         /// <summary>
+        /// <see cref="User"/> whose turn it is to play.
+        /// </summary>
+        User? Next { get; }
+
+        /// <summary>
         /// <see cref="User"/> creator of <see cref="IGameSession"/> game session.
         /// </summary>
         User Creator { get; }

@@ -35,6 +35,7 @@ namespace OceanBattle.Game.Services
 
         public void RemoveFromActive(User player)
             => RemoveFromActive(player.Id);
+
         public void RemoveFromActive(string playerId) 
             => _activePlayers.RemoveAll(u => u.Id == playerId);
 

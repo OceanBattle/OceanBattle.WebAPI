@@ -1,7 +1,6 @@
 ﻿using OceanBattle.DataModel;
 using OceanBattle.DataModel.Game;
 using OceanBattle.Game.Abstractions;
-using OceanBattle.Game.Models;
 using System.Reactive.Linq;
 
 namespace OceanBattle.Game.Services

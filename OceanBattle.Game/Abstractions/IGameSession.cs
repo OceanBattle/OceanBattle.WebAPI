@@ -67,14 +67,16 @@ namespace OceanBattle.Game.Abstractions
         /// Gets <see cref="IBattlefield"/> owned by oponent of <paramref name="player"/>.
         /// </summary>
         /// <param name="player"><see cref="User"/> whose oponent's <see cref="IBattlefield"/> to get.</param>
-        /// <returns><see cref="IBattlefield"/> of <paramref name="player"/>'s oponent.</returns>
+        /// <returns><see cref="IBattlefield"/> of <paramref name="player"/>'s oponent.
+        /// If no matching <see cref="IBattlefield"/> is found, returns <see langword="null"/>.</returns>
         IBattlefield? GetOponentBattlefield(User player);
 
         /// <summary>
         /// Gets <see cref="IBattlefield"/> owned by oponent of <see cref="User"/> with Id equal to <paramref name="playerId"/>.
         /// </summary>
         /// <param name="playerId">Unique Id of <see cref="User"/> whose oponent's <see cref="IBattlefield"/> to get.</param>
-        /// <returns><see cref="IBattlefield"/> of oponent of <see cref="User"/> with <paramref name="playerId"/>.</returns>
+        /// <returns><see cref="IBattlefield"/> of oponent of <see cref="User"/> with <paramref name="playerId"/>.
+        /// If no matching <see cref="IBattlefield"/> is found, returns <see langword="null"/>.</returns>
         IBattlefield? GetOponentBattlefield(string playerId);
 
         /// <summary>

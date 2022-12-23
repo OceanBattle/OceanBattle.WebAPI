@@ -10,7 +10,7 @@ namespace OceanBattle.Game.Models
 {
     public class Session : IGameSession
     {
-        private readonly IBattlefieldFactory _battleFieldFactory;
+        private readonly IBattlefieldFactory _battlefieldFactory;
         private readonly IGameInterface _gameInterface;
 
         private Subject<IGameSession> _completed = new();
@@ -39,7 +39,7 @@ namespace OceanBattle.Game.Models
             Level = level;
             Creator = creator;
             BattlefieldSize = level.BattlefieldSize;
-            _battleFieldFactory = battlefieldFactory;
+            _battlefieldFactory = battlefieldFactory;
             _gameInterface = gameInterface;
 
             Battlefields = new IBattlefield?[2] 
@@ -64,7 +64,7 @@ namespace OceanBattle.Game.Models
             => GetBattlefield(player.Id);
 
         public IBattlefield? GetBattlefield(string playerId)
-            => Battlefields.First(b 
+            => Battlefields.FirstOrDefault(b 
                 => b is not null && 
                    b.Owner is not null && 
                    b.Owner.Id == playerId);
@@ -73,20 +73,21 @@ namespace OceanBattle.Game.Models
             => GetOponentBattlefield(player.Id);
 
         public IBattlefield? GetOponentBattlefield(string playerId) 
-            => Battlefields.First(b 
-                => b is not null && 
-                   b.Owner is not null && 
-                   b.Owner.Id != playerId); 
+            => Battlefields.FirstOrDefault(
+                b => (Creator.Id == playerId || (Oponent is not null && Oponent.Id == playerId)) && 
+                     b is not null && 
+                     b.Owner is not null &&
+                     b.Owner.Id != playerId); 
 
         #region private helpers
 
         private IBattlefield CreateBattlefield(User player, int size)
         {
-            IBattlefield battlefield = _battleFieldFactory.Create(size, size);
+            IBattlefield battlefield = _battlefieldFactory.Create(size, size);
             battlefield.Owner = player;
 
             battlefield.GotHit.Subscribe(
-                    (coordinates) => OnBattlefieldHit(coordinates, battlefield), 
+                    coordinates => OnBattlefieldHit(coordinates, battlefield), 
                     () => OnBattlefieldDestroyed(battlefield));
 
             return battlefield;

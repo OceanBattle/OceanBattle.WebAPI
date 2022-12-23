@@ -8,6 +8,7 @@ using System.Reactive.Subjects;
 using System.Reactive.Linq;
 using OceanBattle.Game.Repositories;
 using OceanBattle.DataModel.Game;
+using System.ComponentModel;
 
 namespace OceanBattle.Game.Tests
 {
@@ -17,69 +18,30 @@ namespace OceanBattle.Game.Tests
         public void Session_ShouldCreate()
         {
             // Arrange
-            LevelsRepository levelsRepo = new LevelsRepository();
-            Level level = levelsRepo
-                .GetLevels()
-                .Last();
-
-            int size = level.BattlefieldSize;
-
-            var factoryMock = new Mock<IBattlefieldFactory>(MockBehavior.Strict);
-            factoryMock.Setup(factory => factory.Create(size, size)).Returns(() =>
-            {
-                var battlefieldMock = ConfigureBattlefieldMock();
-                return battlefieldMock.Object;
-            });
-
+            var factoryMock = CreateFactoryMock();
             var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
-
             User user = new User();
 
             // Act
-            Session session = new Session(
-                user, 
-                level,
-                factoryMock.Object, 
-                gameInterfaceMock.Object);
+            Session session = 
+                CreateSession(user, factoryMock.Object, gameInterfaceMock.Object);
 
             // Assert
             Assert.Equal(user, session.Creator);
             Assert.Equal(2, session.Battlefields.Length);
             Assert.NotNull(session.Battlefields[0]);
             Assert.Equal(user, session.Battlefields[0]!.Owner);
-            Assert.Equal(size, session.BattlefieldSize);
+            Assert.Equal(level.BattlefieldSize, session.BattlefieldSize);
+            Assert.Equal(level, session.Level);
         }
 
         [Fact]
         public void AddOponent_ShouldSucceed()
         {
             // Arrange
-            User creator = new User();
-            LevelsRepository levelsRepo = new LevelsRepository();
-            Level level = levelsRepo
-                .GetLevels()
-                .Last();
-
-            int size = level.BattlefieldSize;
-
-            var factoryMock = new Mock<IBattlefieldFactory>(MockBehavior.Strict);
-            factoryMock.Setup(factory => factory.Create(size, size)).Returns(() =>
-            {
-                var battlefieldMock = ConfigureBattlefieldMock();
-                return battlefieldMock.Object;
-            });
-
+            var factoryMock = CreateFactoryMock();
             var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
-
-            Session session = new Session(
-                creator, 
-                level, 
-                factoryMock.Object, 
-                gameInterfaceMock.Object);
-
-            gameInterfaceMock.Setup(gameInterface => gameInterface.StartDeployment(session))
-                .Returns(Task.CompletedTask);
-
+            Session session = CreateSession(factoryMock.Object, gameInterfaceMock);
             User oponent = new User();
 
             // Act
@@ -93,50 +55,27 @@ namespace OceanBattle.Game.Tests
         }
 
         [Fact]
+        public void AddOponent_ShouldFail()
+        {
+            // Arrange
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Session session = ArrangeActiveSession(gameInterfaceMock);
+            User oponent = new User();
+
+            // Act
+            session.AddOponent(oponent);
+
+            // Assert
+            Assert.NotEqual(oponent, session.Oponent);
+            gameInterfaceMock.Verify(gI => gI.StartDeployment(session), Times.Once());
+        }
+
+        [Fact]
         public void IsActive_ShouldBeTrue()
         {
             // Arrange
-            User creator = new User();
-            User oponent = new User();
-
-            LevelsRepository levelsRepo = new LevelsRepository();
-            Level level = levelsRepo
-                .GetLevels()
-                .Last();
-
-            int size = level.BattlefieldSize;
-
-            var factoryMock = new Mock<IBattlefieldFactory>(MockBehavior.Strict);
-            factoryMock.Setup(factory => factory.Create(size, size)).Returns(() =>
-            {
-                var battlefieldMock = ConfigureBattlefieldMock();
-                battlefieldMock.SetupProperty(battlefield => battlefield.IsReady);
-                battlefieldMock.SetupGet(battlefield => battlefield.Ships).Returns(() => new List<Ship>
-                {
-                    new Corvette(100),
-                    new Corvette(100),
-                    new Frigate(150),
-                    new Destroyer(200)
-                });
-
-                return battlefieldMock.Object;
-            });
-
             var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
-
-            Session session = new Session(
-                creator, 
-                level, 
-                factoryMock.Object, 
-                gameInterfaceMock.Object);
-
-            gameInterfaceMock.Setup(gameInterface => gameInterface.StartDeployment(session))
-                .Returns(Task.CompletedTask);
-
-            session.AddOponent(oponent);
-
-            session.Battlefields[0]!.IsReady = true;
-            session.Battlefields[1]!.IsReady = true;
+            Session session = ArrangeActiveSession(gameInterfaceMock);
 
             // Act
             bool actual = session.IsActive;
@@ -149,46 +88,41 @@ namespace OceanBattle.Game.Tests
         public void IsActive_ShouldBeFalse_ShipsDestroyed()
         {
             // Arrange
-            User creator = new User();
-            User oponent = new User();
-            
-            LevelsRepository levelsRepo = new LevelsRepository();
-            Level level = levelsRepo
-                .GetLevels()
-                .Last();
-
-            int size = level.BattlefieldSize;
-
-            var factoryMock = new Mock<IBattlefieldFactory>(MockBehavior.Strict);
-            factoryMock.Setup(factory => factory.Create(size, size)).Returns(() =>
-            {
-                var battlefieldMock = ConfigureBattlefieldMock();
-                battlefieldMock.SetupProperty(battlefield => battlefield.IsReady);
-                battlefieldMock.SetupGet(battlefield => battlefield.Ships).Returns(() => new List<Ship>
-                {
-                    new Corvette(0),
-                    new Corvette(0),
-                    new Frigate(0),
-                    new Destroyer(0)
-                });
-
-                return battlefieldMock.Object;
-            });
+            var factoryMock = CreateFactoryMock(
+                battlefield => battlefield.SetupProperty(battlefield => battlefield.IsReady)
+                                          .SetupGet(battlefield => battlefield.Ships)
+                                          .Returns(destroyedShips));
 
             var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
-
-            Session session = new Session(
-                creator, 
-                level, 
-                factoryMock.Object, 
-                gameInterfaceMock.Object);
-
-            gameInterfaceMock.Setup(gameInterface => gameInterface.StartDeployment(session))
-                .Returns(Task.CompletedTask);
+            Session session = CreateSession(factoryMock.Object, gameInterfaceMock);
+            User oponent = new User();
 
             session.AddOponent(oponent);
 
             session.Battlefields[0]!.IsReady = true;
+            session.Battlefields[1]!.IsReady = true;
+
+            // Act
+            bool actual = session.IsActive;
+
+            // Assert
+            Assert.False(actual);
+        }
+
+        [Fact]
+        public void IsActive_ShouldBeFalse_NotReady()
+        {
+            // Arrange
+            var factoryMock = CreateFactoryMock(
+                battlefield => battlefield.SetupProperty(battlefield => battlefield.IsReady)
+                                          .SetupGet(battlefield => battlefield.Ships)
+                                          .Returns(destroyedShips));
+
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Session session = CreateSession(factoryMock.Object, gameInterfaceMock);
+            User oponent = new User();
+
+            session.AddOponent(oponent);
             session.Battlefields[1]!.IsReady = true;
 
             // Act
@@ -202,34 +136,13 @@ namespace OceanBattle.Game.Tests
         public void IsActive_ShouldBeFalse_NoOponent()
         {
             // Arrange
-            User creator = new User();
-
-            LevelsRepository levelsRepo = new LevelsRepository();
-            Level level = levelsRepo
-                .GetLevels()
-                .Last();
-
-            int size = level.BattlefieldSize;
-
-            var factoryMock = new Mock<IBattlefieldFactory>(MockBehavior.Strict);
-            factoryMock.Setup(factory => factory.Create(size, size)).Returns(() =>
-            {
-                var battlefieldMock = ConfigureBattlefieldMock();
-                battlefieldMock.SetupProperty(battlefield => battlefield.IsReady);
-
-                return battlefieldMock.Object;
-            });
+            var factoryMock = CreateFactoryMock(
+                battlefield => battlefield.SetupProperty(battlefield => battlefield.IsReady)
+                                          .SetupGet(battlefield => battlefield.Ships)
+                                          .Returns(functioningShips));
 
             var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
-
-            Session session = new Session(
-                creator, 
-                level, 
-                factoryMock.Object, 
-                gameInterfaceMock.Object);
-
-            gameInterfaceMock.Setup(gameInterface => gameInterface.StartDeployment(session))
-                .Returns(Task.CompletedTask);
+            Session session = CreateSession(factoryMock.Object, gameInterfaceMock);
 
             session.Battlefields[0]!.IsReady = true;
 
@@ -240,14 +153,280 @@ namespace OceanBattle.Game.Tests
             Assert.False(actual);
         }
 
-        private Mock<IBattlefield> ConfigureBattlefieldMock()
+        [Fact]
+        public void GetBattlefield_ShouldSucceed()
+        {
+            // Arrange
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Session session = ArrangeActiveSession(gameInterfaceMock);
+            User creator = session.Creator;
+
+            // Act
+            IBattlefield? battlefield = session.GetBattlefield(creator);
+
+            // Assert
+            Assert.NotNull(battlefield);
+            Assert.Equal(session.Battlefields[0], battlefield);
+        }
+
+        [Fact]
+        public void GetBattlefield_ShouldFail_UninvolvedUser()
+        {
+            // Arrange
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Session session = ArrangeActiveSession(gameInterfaceMock);
+            User player = new User();
+
+            // Act
+            IBattlefield? battlefield = session.GetBattlefield(player);
+
+            // Assert
+            Assert.Null(battlefield);
+        }
+
+        [Fact]
+        public void GetOponentBattlefield_ShouldSucceed()
+        {
+            // Arrange
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Session session = ArrangeActiveSession(gameInterfaceMock);
+            User oponent = session.Oponent!;
+
+            // Act
+            IBattlefield? battlefield = session.GetOponentBattlefield(oponent);
+
+            // Assert
+            Assert.NotNull(battlefield);
+            Assert.Equal(session.Battlefields[0], battlefield);
+        }
+
+        [Fact]
+        public void GetOponentBattlefield_ShouldFail_UninvolvedUser()
+        {
+            // Arrange
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Session session = ArrangeActiveSession(gameInterfaceMock);
+            User player = new User();
+
+            // Act
+            IBattlefield? battlefield = session.GetOponentBattlefield(player);
+
+            // Assert
+            Assert.Null(battlefield);
+        }
+
+        [Fact]
+        public void Completed_ShouldEmitOnNext()
+        {
+            // Arrange
+            Subject<(int x, int y)> gotHit = new Subject<(int x, int y)>();
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Session session = ArrangeActiveSession(gameInterfaceMock, gotHit);
+
+            gameInterfaceMock.Setup(gI => gI.EndGame(session))
+                .Returns(Task.CompletedTask);
+
+            bool actual = false;
+            session.Completed.Subscribe(coordinates => actual = true);
+
+            // Act
+            gotHit.OnCompleted();
+
+            // Assert
+            Assert.True(actual);            
+        }
+
+        [Fact]
+        public void OnCompleted_ShouldCallGameEnd()
+        {
+            // Arrange
+            Subject<(int x, int y)> gotHit = new Subject<(int x, int y)>();
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Session session = ArrangeActiveSession(gameInterfaceMock, gotHit);
+
+            gameInterfaceMock.Setup(gI => gI.EndGame(session))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            gotHit.OnCompleted();
+
+            // Assert
+            gameInterfaceMock.Verify(gI => gI.EndGame(session), Times.AtLeastOnce());
+        }
+
+        [Fact]
+        public void OnHit_ShouldCallGotHit()
+        {
+            // Arrange
+            Subject<(int x, int y)> gotHit = new Subject<(int x, int y)>();
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Session session = ArrangeActiveSession(gameInterfaceMock, gotHit);
+
+            (int x, int y) coordinates = (0, 0);
+
+            gameInterfaceMock.Setup(gI => gI.GotHit(session, session.Creator, coordinates))
+                .Returns(Task.CompletedTask);
+
+            gameInterfaceMock.Setup(gI => gI.GotHit(session, session.Oponent!, coordinates))
+                .Returns(Task.CompletedTask);
+            
+            // Act
+            gotHit.OnNext(coordinates);
+
+            // Assert
+            gameInterfaceMock.Verify(
+                gI => gI.GotHit(session, session.Creator, coordinates), Times.Once());
+
+            gameInterfaceMock.Verify(
+                gI => gI.GotHit(session, session.Oponent!, coordinates), Times.Once());
+        }
+
+        [Fact]
+        public void Next_ShouldBeSet()
+        {
+            // Arrange
+            Subject<(int x, int y)> gotHit = new Subject<(int x, int y)>();
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Session session = ArrangeSessionWithoutOponent(gameInterfaceMock, gotHit);
+
+            (int x, int y) coordinates = (0, 0);
+
+            gameInterfaceMock.Setup(gI => gI.GotHit(session, session.Creator, coordinates))
+                .Returns(Task.CompletedTask);
+
+            // Act
+            gotHit.OnNext(coordinates);
+
+            // Assert
+            Assert.Equal(session.Creator, session.Next);
+        }
+
+        #region private helpers
+
+        private const int dimensions = 20;
+        private Level level => new Level
+        {
+            BattlefieldSize = dimensions,
+            AvailableTypes = new Dictionary<Type, int>
+            {
+                { typeof(Battleship), 5 },
+                { typeof(Cruiser),    5 },
+                { typeof(Destroyer),  5 },
+                { typeof(Frigate),    5 },
+                { typeof(Corvette),   5 },
+            }
+        };
+
+        private List<Ship> functioningShips => new List<Ship>
+        {
+            new Corvette(100),
+            new Corvette(100),
+            new Frigate(150),
+            new Destroyer(200)
+        };
+
+        private List<Ship> destroyedShips => new List<Ship>
+        {
+            new Corvette(0),
+            new Corvette(0),
+            new Frigate(0),
+            new Destroyer(0)
+        };
+
+        private Session ArrangeSessionWithoutOponent(
+            Mock<IGameInterface> gameInterfaceMock,
+            Subject<(int x, int y)> gotHit)
+        {
+            var factoryMock = CreateFactoryMock(
+                battlefield => battlefield.SetupProperty(battlefield => battlefield.IsReady)
+                              .SetupGet(battlefield => battlefield.Ships)
+                              .Returns(functioningShips),
+                gotHit);
+
+            Session session = CreateSession(factoryMock.Object, gameInterfaceMock);
+
+            session.Battlefields[0]!.IsReady = true;
+
+            return session;
+        }
+
+        private Session ArrangeActiveSession(
+            Mock<IGameInterface> gameInterfaceMock, 
+            Subject<(int x, int y)> gotHit)
+        {
+            Session session = 
+                ArrangeSessionWithoutOponent(gameInterfaceMock, gotHit);
+
+            User oponent = new User();
+            session.AddOponent(oponent);
+
+            session.Battlefields[1]!.IsReady = true;
+
+            return session;
+        }
+
+        private Session ArrangeActiveSession(Mock<IGameInterface> gameInterfaceMock)
+            => ArrangeActiveSession(gameInterfaceMock, new Subject<(int x, int y)>());
+
+        private void SetupGameInterfaceMock(Mock<IGameInterface> mock, Session session) 
+            => mock.Setup(gameInterface => gameInterface.StartDeployment(session))
+                   .Returns(Task.CompletedTask);
+
+        private Mock<IBattlefieldFactory> CreateFactoryMock() 
+            => CreateFactoryMock(battlefield => { });
+
+        private Mock<IBattlefieldFactory> CreateFactoryMock(
+            Action<Mock<IBattlefield>> battlefieldSetup, 
+            Subject<(int x, int y)> gotHit)
+        {
+            var factoryMock = new Mock<IBattlefieldFactory>(MockBehavior.Strict);
+            factoryMock.Setup(factory => factory.Create(level.BattlefieldSize, level.BattlefieldSize))
+                .Returns(
+                () =>
+                {
+                    var battlefieldMock = CreateBattlefieldMock(gotHit);
+                    battlefieldSetup(battlefieldMock);
+
+                    return battlefieldMock.Object;
+                });
+
+            return factoryMock;
+        }
+
+        private Mock<IBattlefieldFactory> CreateFactoryMock(Action<Mock<IBattlefield>> battlefieldSetup) 
+            => CreateFactoryMock(battlefieldSetup, new Subject<(int x, int y)>());
+
+        private Session CreateSession(IBattlefieldFactory factory, Mock<IGameInterface> gameInterfaceMock)
+        {
+            Session session = CreateSession(factory, gameInterfaceMock.Object);
+            SetupGameInterfaceMock(gameInterfaceMock, session);
+
+            return session;
+        }
+
+        private Session CreateSession(IBattlefieldFactory factory, IGameInterface gameInterface)
+            => CreateSession(new User(), factory, gameInterface);
+
+        private Session CreateSession(
+            User creator, 
+            IBattlefieldFactory factory, 
+            IGameInterface gameInterface) 
+            => new Session(creator, level, factory, gameInterface);
+
+        private Mock<IBattlefield> CreateBattlefieldMock()
+            => CreateBattlefieldMock(new Subject<(int x, int y)>());
+
+        private Mock<IBattlefield> CreateBattlefieldMock(Subject<(int x, int y)> gotHit)
         {
             var battlefieldMock = new Mock<IBattlefield>(MockBehavior.Strict);
-            battlefieldMock.SetupProperty(battlefield => battlefield.Owner);
-            battlefieldMock.SetupGet(battlefield => battlefield.GotHit)
-                .Returns(new Subject<(int x, int y)>().AsObservable());
+
+            battlefieldMock.SetupProperty(battlefield => battlefield.Owner)
+                           .SetupGet(battlefield => battlefield.GotHit)
+                           .Returns(() => gotHit.AsObservable());
 
             return battlefieldMock;
         }
+
+        #endregion
     }
 }

@@ -1,14 +1,12 @@
-using OceanBattle.DataModel;
-using OceanBattle.Game.Models;
 using Moq;
-using OceanBattle.Game.Abstractions;
+using OceanBattle.DataModel;
+using OceanBattle.DataModel.Game;
 using OceanBattle.DataModel.Game.Abstractions;
 using OceanBattle.DataModel.Game.Ships;
-using System.Reactive.Subjects;
+using OceanBattle.Game.Abstractions;
+using OceanBattle.Game.Models;
 using System.Reactive.Linq;
-using OceanBattle.Game.Repositories;
-using OceanBattle.DataModel.Game;
-using System.ComponentModel;
+using System.Reactive.Subjects;
 
 namespace OceanBattle.Game.Tests
 {

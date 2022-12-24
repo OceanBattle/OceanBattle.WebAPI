@@ -37,7 +37,8 @@ namespace OceanBattle.Game.Services
 
             User? creator = _playersManager.GetPlayer(creatorId);
 
-            if (creator is null)
+            if (creator is null ||
+                !_playersManager.ActivePlayers.Contains(creator))
                 return null;
 
             IGameSession session = _sessionFactory.Create(creator, level);

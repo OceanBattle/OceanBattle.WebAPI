@@ -25,6 +25,11 @@ namespace OceanBattle.Game.Abstractions
         bool IsActive { get; }
 
         /// <summary>
+        /// List containing uniqe IDs of players that have been invited to join this session.
+        /// </summary>
+        List<string> InvitedPlayersIDs { get; }
+
+        /// <summary>
         /// <see cref="User"/> whose turn it is to play.
         /// </summary>
         User? Next { get; }

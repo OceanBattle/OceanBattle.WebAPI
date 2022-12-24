@@ -302,7 +302,7 @@ namespace OceanBattle.Game.Tests
         #region private helpers
 
         private const int dimensions = 20;
-        private Level level => new Level
+        private Level level = new Level
         {
             BattlefieldSize = dimensions,
             AvailableTypes = new Dictionary<Type, int>

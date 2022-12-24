@@ -21,6 +21,14 @@ namespace OceanBattle.Game.Services
             _playersManager = playersManager;
         }
 
+        public void EndSessions(User creator)
+            => EndSessions(creator.Id);
+
+        public void EndSessions(string creatorId)
+        {
+            _sessions.RemoveAll(s => s.Creator.Id == creatorId);
+        }
+
         public IGameSession? CreateSession(string creatorId, Level level)
         {
             if (_sessions.Any(s => s.Creator.Id == creatorId || 

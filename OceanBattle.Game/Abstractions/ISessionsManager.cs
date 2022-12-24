@@ -3,6 +3,7 @@ using OceanBattle.DataModel.Game;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -17,6 +18,18 @@ namespace OceanBattle.Game.Abstractions
         /// All currently running game sessions.
         /// </summary>
         IEnumerable<IGameSession> Sessions { get; }
+
+        /// <summary>
+        /// Ends all sessions created by player <paramref name="creator"/>
+        /// </summary>
+        /// <param name="creator">Creator of session.</param>
+        void EndSessions(User creator);
+
+        /// <summary>
+        /// Ends all sessions created by player with unique ID equal to <paramref name="creatorId"/>
+        /// </summary>
+        /// <param name="creatorId">Unique ID of session's creator.</param>
+        void EndSessions(string creatorId);
 
         /// <summary>
         /// Creates new game session.

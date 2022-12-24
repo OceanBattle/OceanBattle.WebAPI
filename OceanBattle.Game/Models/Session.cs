@@ -30,6 +30,8 @@ namespace OceanBattle.Game.Models
         public User Creator { get; private set; }
         public User? Oponent { get; private set; }
 
+        public List<string> InvitedPlayersIDs { get; private set; }
+
         public Session(
             User creator, 
             Level level,
@@ -41,6 +43,8 @@ namespace OceanBattle.Game.Models
             BattlefieldSize = level.BattlefieldSize;
             _battlefieldFactory = battlefieldFactory;
             _gameInterface = gameInterface;
+
+            InvitedPlayersIDs = new List<string>();
 
             Battlefields = new IBattlefield?[2] 
             { 

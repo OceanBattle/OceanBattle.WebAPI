@@ -1,11 +1,6 @@
 ﻿using OceanBattle.DataModel;
 using OceanBattle.DataModel.DTOs;
 using OceanBattle.DataModel.Game.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace OceanBattle.Game.Abstractions
 {
@@ -88,7 +83,8 @@ namespace OceanBattle.Game.Abstractions
         /// </summary>
         /// <param name="player"><see cref="User"/> that accepted invite.</param>
         /// <param name="sender"><see cref="User"/> that sent invite.</param>
-        /// <returns><see cref="IBattlefield"/> associated with invited player.</returns>
+        /// <returns><see cref="IBattlefield"/> associated with invited player.
+        /// <see langword="null"/> if no session found.</returns>
         IBattlefield? AcceptInvite(User player, User sender);
 
         /// <summary>
@@ -96,7 +92,8 @@ namespace OceanBattle.Game.Abstractions
         /// </summary>
         /// <param name="playerId">Unique Id of <see cref="User"/> that accepted invite.</param>
         /// <param name="sender"><see cref="UserDto"/> object representing <see cref="User"/> that sent invite.</param>
-        /// <returns><see cref="IBattlefield"/> associated with invited player.</returns>
+        /// <returns><see cref="IBattlefield"/> associated with invited player.
+        /// <see langword="null"/> if no session found.</returns>
         IBattlefield? AcceptInvite(string playerId, UserDto sender);
 
         /// <summary>
@@ -104,7 +101,8 @@ namespace OceanBattle.Game.Abstractions
         /// </summary>
         /// <param name="playerId">Unique Id of <see cref="User"/> that accepted invite.</param>
         /// <param name="senderId">Unique Id of <see cref="User"/> that sent invite.</param>
-        /// <returns><see cref="IBattlefield"/> associated with invited player.</returns>
+        /// <returns><see cref="IBattlefield"/> associated with invited player.
+        /// <see langword="null"/> if no session found.</returns>
         IBattlefield? AcceptInvite(string playerId, string senderId);
     }
 }

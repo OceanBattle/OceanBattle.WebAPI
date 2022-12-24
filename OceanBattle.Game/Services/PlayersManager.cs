@@ -23,7 +23,7 @@ namespace OceanBattle.Game.Services
 
         public void AddAsActive(User user)
         {
-            if (!_activePlayers.Contains(user))
+            if (!_activePlayers.Any(u => u.Id == user.Id))
                 _activePlayers.Add(user);
         }
 
@@ -36,8 +36,11 @@ namespace OceanBattle.Game.Services
         public void RemoveFromActive(User player)
             => RemoveFromActive(player.Id);
 
-        public void RemoveFromActive(string playerId) 
-            => _activePlayers.RemoveAll(u => u.Id == playerId);
+        public void RemoveFromActive(string playerId)
+        {
+            _sessionsManager.EndSessions(playerId);
+            _activePlayers.RemoveAll(u => u.Id == playerId);
+        }           
 
         public void InvitePlayer(User player, User sender)
             => InvitePlayer(player.Id, sender.Id);
@@ -54,13 +57,23 @@ namespace OceanBattle.Game.Services
 
         public void InvitePlayer(string playerId, string senderId)
         {
+            if (!_activePlayers.Any(u => u.Id == playerId))
+                return;
+
             User? sender = GetPlayer(senderId);
 
             if (sender is null)
                 return;
 
-            if (_activePlayers.Any(u => u.Id == playerId))
-                _gameInterface.SendInvite(playerId, sender);
+            IGameSession? session = _sessionsManager.FindSession(senderId);
+
+            if (session is null)
+                return;
+
+            if (!session.InvitedPlayersIDs.Contains(playerId))
+                session.InvitedPlayersIDs.Add(playerId);
+
+            _gameInterface.SendInvite(playerId, sender);
         }
 
         public IBattlefield? AcceptInvite(User player, User sender)
@@ -93,12 +106,16 @@ namespace OceanBattle.Game.Services
 
         public IBattlefield? AcceptInvite(string playerId, string senderId)
         {
+            if (GetPlayer(senderId) is null)
+                return null;
+
             if (_sessionsManager.FindSession(playerId) is not null)
                 return null;
 
             IGameSession? gameSession = _sessionsManager.FindSession(senderId);
 
             if (gameSession is null || 
+                !gameSession.InvitedPlayersIDs.Contains(playerId) ||
                 gameSession.Oponent is not null)
                 return null;
 

@@ -10,11 +10,45 @@ namespace OceanBattle.Game.Repositories
         {
             return new Ship[] 
             {
+                // Corvettes
                 new Corvette(100)
                 {
                     Weapons = new[]
                     {
                         new Weapon { Damage = 20, DamageRadius = 1 }
+                    }
+                },
+
+                new Corvette(100)
+                {
+                    Weapons = new[]
+                    {
+                        new Weapon { Damage = 20, DamageRadius = 1 }
+                    }
+                },
+
+                new Corvette(100)
+                {
+                    Weapons = new[]
+                    {
+                        new Weapon { Damage = 20, DamageRadius = 1 }
+                    }
+                },
+
+                new Corvette(100)
+                {
+                    Weapons = new[]
+                    {
+                        new Weapon { Damage = 20, DamageRadius = 1 }
+                    }
+                },
+
+                // Frigates
+                new Frigate(150)
+                {
+                    Weapons = new[]
+                    {
+                        new Weapon { Damage = 50, DamageRadius = 1 }
                     }
                 },
 
@@ -26,6 +60,7 @@ namespace OceanBattle.Game.Repositories
                     }
                 },
 
+                // Destroyers
                 new Destroyer(150) 
                 {
                     Weapons = new[]
@@ -34,23 +69,23 @@ namespace OceanBattle.Game.Repositories
                     }
                 },
 
-                new Cruiser(200)
-                {
-                    Weapons = new[]
-                    {
-                        new Weapon { Damage = 150, DamageRadius = 2 },
-                        new Weapon { Damage = 150, DamageRadius = 2 }
-                    }
-                },
+                //new Cruiser(200)
+                //{
+                //    Weapons = new[]
+                //    {
+                //        new Weapon { Damage = 150, DamageRadius = 2 },
+                //        new Weapon { Damage = 150, DamageRadius = 2 }
+                //    }
+                //},
 
-                new Battleship(250)
-                {
-                    Weapons = new[]
-                    {
-                        new Weapon { Damage = 100, DamageRadius = 3 },
-                        new Weapon { Damage = 100, DamageRadius = 3 }
-                    }
-                }
+                //new Battleship(250)
+                //{
+                //    Weapons = new[]
+                //    {
+                //        new Weapon { Damage = 100, DamageRadius = 3 },
+                //        new Weapon { Damage = 100, DamageRadius = 3 }
+                //    }
+                //}
             };
         }
     }

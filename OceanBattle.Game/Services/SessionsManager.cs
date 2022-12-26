@@ -15,10 +15,10 @@ namespace OceanBattle.Game.Services
 
         public SessionsManager(
             ISessionFactory sessionFactory,
-            IPlayersManager playersManager)
+            PlayersManagerFactory playersManagerFactory)
         {
             _sessionFactory = sessionFactory;
-            _playersManager = playersManager;
+            _playersManager = playersManagerFactory();
         }
 
         public void EndSessions(User creator)

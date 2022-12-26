@@ -5,6 +5,8 @@ using OceanBattle.Game.Abstractions;
 
 namespace OceanBattle.Game.Services
 {
+    public delegate IPlayersManager PlayersManagerFactory();
+
     public class PlayersManager : IPlayersManager
     {
         private readonly IGameInterface _gameInterface;
@@ -89,19 +91,24 @@ namespace OceanBattle.Game.Services
             return AcceptInvite(playerId, activeSender.Id);
         }
 
-        public void ConfirmReady(User player)
+        public bool ConfirmReady(User player)
             => ConfirmReady(player.Id);
 
-        public void ConfirmReady(string playerId)
+        public bool ConfirmReady(string playerId)
         {
             IGameSession? session = _sessionsManager.FindSession(playerId);
 
             if (session is null)
-                return;
+                return false;
 
-            session.Battlefields
-                .First(b => b!.Owner!.Id == playerId)!
-                .IsReady = true;
+            IBattlefield? battlefield = session.GetBattlefield(playerId);
+
+            if (battlefield is null)
+                return false;
+
+            battlefield.IsReady = true;
+
+            return battlefield.IsReady;
         }
 
         public IBattlefield? AcceptInvite(string playerId, string senderId)

@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using OceanBattle.Data;
 using OceanBattle.DataModel;
 using OceanBattle.DataModel.DTOs;
+using OceanBattle.Game.Abstractions;
 
 namespace OceanBattle.Controllers
 {
@@ -15,10 +17,17 @@ namespace OceanBattle.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserManager<User> _userManager;
+        private readonly AppDbContext _dbContext;
+        private readonly IShipsRepository _shipsRepository;
 
-        public UserController(UserManager<User> userManager)
+        public UserController(
+            UserManager<User> userManager,
+            AppDbContext dbContext,
+            IShipsRepository shipsRepository)
         {
             _userManager = userManager;
+            _dbContext = dbContext;
+            _shipsRepository = shipsRepository;
         }
 
         /// <summary>
@@ -39,7 +48,7 @@ namespace OceanBattle.Controllers
                 LastName = request.LastName,
                 UserName = request.UserName,
                 Email = request.Email,
-                BirthDate = request.BirthDate
+                OwnedVessels = _shipsRepository.GetShips()
             };
 
             IdentityResult result = await _userManager.CreateAsync(user, request.Password!);
@@ -48,6 +57,28 @@ namespace OceanBattle.Controllers
                 return BadRequest(result);
 
             return Ok(result);
+        }
+
+        /// <summary>
+        /// Gets user data transfer object filled with <see cref="User"/>'s data.
+        /// </summary>
+        /// <returns><see cref="UserDto"/> with <see cref="User"/>'s data.</returns>
+        [HttpGet("user")]
+        public async Task<ActionResult<UserDto>> GetUser()
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            string id = _userManager.GetUserId(User)!;
+            User user = (await _dbContext.Users.FindAsync(id))!;
+
+            UserDto dto = new UserDto
+            {
+                Email = user.Email,
+                UserName = user.UserName
+            };
+
+            return Ok(dto);
         }
     }
 }

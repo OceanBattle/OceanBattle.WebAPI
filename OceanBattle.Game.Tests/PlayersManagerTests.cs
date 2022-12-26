@@ -275,7 +275,7 @@ namespace OceanBattle.Game.Tests
                                .Returns(sessionMock.Object);
 
             PlayersManager playersManager =
-                Arrange_AceptInvite(
+                Arrange_AcceptInvite(
                     reciever,
                     battlefieldMock,
                     sessionMock,
@@ -322,7 +322,7 @@ namespace OceanBattle.Game.Tests
                        .Returns(() => null);
 
             PlayersManager playersManager = 
-                Arrange_AceptInvite(
+                Arrange_AcceptInvite(
                     reciever,
                     battlefieldMock,
                     sessionMock,
@@ -364,7 +364,7 @@ namespace OceanBattle.Game.Tests
                        .Returns(() => null);
 
             PlayersManager playersManager =
-                Arrange_AceptInvite(
+                Arrange_AcceptInvite(
                     reciever,
                     battlefieldMock,
                     sessionMock,
@@ -406,7 +406,7 @@ namespace OceanBattle.Game.Tests
                        .Returns(() => null);
 
             PlayersManager playersManager =
-                Arrange_AceptInvite(
+                Arrange_AcceptInvite(
                     reciever,
                     battlefieldMock,
                     sessionMock,
@@ -450,7 +450,7 @@ namespace OceanBattle.Game.Tests
                        .Returns(() => null);
 
             PlayersManager playersManager =
-                Arrange_AceptInvite(
+                Arrange_AcceptInvite(
                     reciever,
                     battlefieldMock,
                     sessionMock,
@@ -494,7 +494,7 @@ namespace OceanBattle.Game.Tests
                        .Returns(() => differentOponent);
 
             PlayersManager playersManager =
-                Arrange_AceptInvite(
+                Arrange_AcceptInvite(
                     reciever,
                     battlefieldMock,
                     sessionMock,
@@ -537,7 +537,7 @@ namespace OceanBattle.Game.Tests
                                .Returns(sessionMock.Object);
 
             PlayersManager playersManager =
-                Arrange_AceptInvite(
+                Arrange_AcceptInvite(
                     reciever,
                     battlefieldMock,
                     sessionMock,
@@ -553,6 +553,75 @@ namespace OceanBattle.Game.Tests
             // Assert
             Assert.Null(actual);
             sessionMock.Verify(s => s.AddOponent(reciever), Times.Never());
+        }
+
+        [Fact]
+        public void ConfirmReady_ShouldSucceed()
+        {
+            // Arrange
+            User user = new User();
+
+            var battlefieldMock = new Mock<IBattlefield>(MockBehavior.Strict);
+
+            battlefieldMock.SetupProperty(b => b.IsReady);
+
+            var sessionMock = new Mock<IGameSession>(MockBehavior.Strict);
+
+            sessionMock.Setup(s => s.GetBattlefield(user.Id))
+                       .Returns(battlefieldMock.Object);
+
+            var sessionsManagerMock = new Mock<ISessionsManager>(MockBehavior.Strict);
+
+            sessionsManagerMock.Setup(sm => sm.FindSession(user.Id))
+                               .Returns(sessionMock.Object);
+
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+
+            PlayersManager playersManager = 
+                new PlayersManager(gameInterfaceMock.Object, sessionsManagerMock.Object);
+
+            // Act
+            bool actual = playersManager.ConfirmReady(user);
+
+            // Assert
+            Assert.True(actual);
+            battlefieldMock.VerifySet(b => b.IsReady = true, Times.Once());
+        }
+
+        [Fact]
+        public void ConfirmReady_ShouldFail()
+        {
+            // Arrange
+            User user = new User();
+
+            var battlefieldMock = new Mock<IBattlefield>(MockBehavior.Strict);
+
+            battlefieldMock.SetupGet(b => b.IsReady)
+                           .Returns(false);
+
+            battlefieldMock.SetupSet(b => b.IsReady = true);
+
+            var sessionMock = new Mock<IGameSession>(MockBehavior.Strict);
+
+            sessionMock.Setup(s => s.GetBattlefield(user.Id))
+                       .Returns(battlefieldMock.Object);
+
+            var sessionsManagerMock = new Mock<ISessionsManager>(MockBehavior.Strict);
+
+            sessionsManagerMock.Setup(sm => sm.FindSession(user.Id))
+                               .Returns(sessionMock.Object);
+
+            var gameInterfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+
+            PlayersManager playersManager =
+                new PlayersManager(gameInterfaceMock.Object, sessionsManagerMock.Object);
+
+            // Act
+            bool actual = playersManager.ConfirmReady(user);
+
+            // Assert
+            Assert.False(actual);
+            battlefieldMock.VerifyGet(b => b.IsReady, Times.Once());
         }
 
         #region private helpers
@@ -573,7 +642,7 @@ namespace OceanBattle.Game.Tests
             return new PlayersManager(interfaceMock.Object, sessionsManagerMock.Object);
         }        
 
-        private PlayersManager Arrange_AceptInvite(
+        private PlayersManager Arrange_AcceptInvite(
             User reciever,
             Mock<IBattlefield> battlefieldMock,
             Mock<IGameSession> sessionMock, 

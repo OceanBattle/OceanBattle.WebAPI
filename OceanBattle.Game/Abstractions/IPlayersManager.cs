@@ -37,13 +37,17 @@ namespace OceanBattle.Game.Abstractions
         /// Confirms that <see cref="User"/> is ready to start game.
         /// </summary>
         /// <param name="player"><see cref="User"/> that is ready.</param>
-        public void ConfirmReady(User player);
+        /// <returns><see langword="true"/> if <see cref="User"/> can be ready. 
+        /// Otherwise <see langword="false"/>.</returns>
+        public bool ConfirmReady(User player);
 
         /// <summary>
         /// Confirms that <see cref="User"/> is ready to start game.
         /// </summary>
         /// <param name="playerId">Unique Id of <see cref="User"/> that is ready.</param>
-        public void ConfirmReady(string playerId);
+        /// <returns><see langword="true"/> if <see cref="User"/> can be ready. 
+        /// Otherwise <see langword="false"/>.</returns>
+        public bool ConfirmReady(string playerId);
 
         /// <summary>
         /// Removes player from the list of currently active <see cref="User"/>s.

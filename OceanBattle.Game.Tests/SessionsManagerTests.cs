@@ -350,7 +350,7 @@ namespace OceanBattle.Game.Tests
             playersManagerMock.Setup(manager => manager.GetPlayer(creator.Id))
                               .Returns(creator);
 
-            return new SessionsManager(factoryMock.Object, playersManagerMock.Object);
+            return new SessionsManager(factoryMock.Object, () => playersManagerMock.Object);
         }
 
         #endregion

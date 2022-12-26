@@ -90,6 +90,9 @@ namespace OceanBattle.Game.Models
             IBattlefield battlefield = _battlefieldFactory.Create(size, size);
             battlefield.Owner = player;
 
+            battlefield.StatusChanged.Take(1)
+                                     .Subscribe(status => OnBattlefieldStatusChanged(status, battlefield));
+
             battlefield.GotHit.Subscribe(
                     coordinates => OnBattlefieldHit(coordinates, battlefield), 
                     () => OnBattlefieldDestroyed(battlefield));
@@ -103,6 +106,23 @@ namespace OceanBattle.Game.Models
         {
             _gameInterface.GotHit(this, battlefield.Owner!, coordinates);
             Next = battlefield.Owner;
+        }
+
+        private void OnBattlefieldStatusChanged(bool status, IBattlefield battlefield)
+        {
+            if (battlefield.Owner is null)
+                return;
+
+            IBattlefield? oponentBattlefield = GetOponentBattlefield(battlefield.Owner);
+
+            if (oponentBattlefield is null)
+                return;
+
+            if (oponentBattlefield.IsReady && status)
+            {
+                _gameInterface.FinishDeployment(this);
+                _gameInterface.StartGame(this);
+            }
         }
 
         private void OnBattlefieldDestroyed(IBattlefield battlefield)

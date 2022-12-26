@@ -299,6 +299,47 @@ namespace OceanBattle.Game.Tests
             Assert.Equal(session.Creator, session.Next);
         }
 
+        [Fact]
+        public void StatusChanged_ShouldCallStartGame()
+        {
+            // Arrange
+            var interfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Subject<bool> creatorStatusChanged = new Subject<bool>();
+
+            Session session = Arrange_StatusChanged(
+                true,
+                interfaceMock,
+                creatorStatusChanged);
+
+            // Act
+            creatorStatusChanged.OnNext(true);
+            creatorStatusChanged.OnNext(true);
+
+            // Assert
+            interfaceMock.Verify(gi => gi.FinishDeployment(session), Times.Once());
+            interfaceMock.Verify(gi => gi.StartGame(session), Times.Once());
+        }
+
+        [Fact]
+        public void StatusChanged_ShouldNotCallStartGame_OponentNotReady()
+        {
+            // Arrange
+            var interfaceMock = new Mock<IGameInterface>(MockBehavior.Strict);
+            Subject<bool> creatorStatusChanged = new Subject<bool>();
+
+            Session session = Arrange_StatusChanged(
+                false,
+                interfaceMock,
+                creatorStatusChanged);
+
+            // Act
+            creatorStatusChanged.OnNext(true);
+
+            // Assert
+            interfaceMock.Verify(gi => gi.FinishDeployment(session), Times.Never());
+            interfaceMock.Verify(gi => gi.StartGame(session), Times.Never());
+        }
+
         #region private helpers
 
         private const int dimensions = 20;
@@ -330,6 +371,49 @@ namespace OceanBattle.Game.Tests
             new Frigate(0),
             new Destroyer(0)
         };
+
+        private Session Arrange_StatusChanged(
+            bool oponentReady,
+            Mock<IGameInterface> interfaceMock,
+            Subject<bool> statusChanged)
+        {
+            int battlefieldCount = 0;
+
+            var factoryMock = new Mock<IBattlefieldFactory>(MockBehavior.Strict);
+            factoryMock.Setup(f => f.Create(level.BattlefieldSize, level.BattlefieldSize))
+                       .Returns(() =>
+                       {
+                           var battlefieldMock = CreateBattlefieldMock();
+
+                           if (battlefieldCount < 1)
+                               battlefieldMock.SetupGet(f => f.StatusChanged)
+                                              .Returns(() => statusChanged.AsObservable());
+                           else
+                               battlefieldMock.SetupGet(b => b.IsReady)
+                                              .Returns(oponentReady);
+
+                           battlefieldCount++;
+
+                           return battlefieldMock.Object;
+                       });
+
+            Session session =
+                CreateSession(factoryMock.Object, interfaceMock);
+
+            var sequence = new MockSequence();
+
+            interfaceMock.InSequence(sequence)
+                         .Setup(gi => gi.FinishDeployment(session))
+                         .Returns(Task.CompletedTask);
+
+            interfaceMock.InSequence(sequence)
+                         .Setup(gi => gi.StartGame(session))
+                         .Returns(Task.CompletedTask);
+
+            session.AddOponent(new User());
+
+            return session;
+        }
 
         private Session ArrangeSessionWithoutOponent(
             Mock<IGameInterface> gameInterfaceMock,
@@ -421,6 +505,9 @@ namespace OceanBattle.Game.Tests
             battlefieldMock.SetupProperty(battlefield => battlefield.Owner)
                            .SetupGet(battlefield => battlefield.GotHit)
                            .Returns(() => gotHit.AsObservable());
+
+            battlefieldMock.SetupGet(battlefield => battlefield.StatusChanged)
+                           .Returns(new Subject<bool>().AsObservable());
 
             return battlefieldMock;
         }

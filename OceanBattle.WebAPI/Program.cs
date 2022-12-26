@@ -3,10 +3,13 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 using OceanBattle.Data;
 using OceanBattle.DataModel;
+using OceanBattle.Game.DependencyInjection;
 using OceanBattle.Jwt;
 using OceanBattle.Jwt.DependencyInjection;
 using OceanBattle.RefreshTokens;
 using OceanBattle.RefreshTokens.DependencyInjection;
+using OceanBattle.WebAPI.Game;
+using OceanBattle.WebAPI.Hubs;
 
 namespace OceanBattle
 {
@@ -70,6 +73,9 @@ namespace OceanBattle
                 options => options.IterationCount = 500000);
 
             builder.Services.AddAuthorizationCore();
+            builder.Services.AddOceanBattleGame<GameInterface>();
+
+            builder.Services.AddSignalR();
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
@@ -106,6 +112,8 @@ namespace OceanBattle
             app.UseAuthorization();
 
             app.MapControllers();
+
+            app.MapHub<GameHub>("/gameHub");
 
             app.Run();
         }

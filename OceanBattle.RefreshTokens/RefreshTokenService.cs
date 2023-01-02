@@ -50,7 +50,7 @@ namespace OceanBattle.RefreshTokens
                 UserId = token.UserId
             };
 
-            var t = _dbContext.RefreshTokens.Add(newToken);
+            _dbContext.RefreshTokens.Add(newToken);
             await _dbContext.SaveChangesAsync();
         }
 

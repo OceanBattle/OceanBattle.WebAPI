@@ -21,8 +21,7 @@ namespace OceanBattle.RefreshTokens
                 .IsUnique();
 
             builder.Entity<RefreshToken>()
-                .HasIndex(rt => rt.UserId)
-                .IsUnique();
+                .HasIndex(rt => rt.UserId);
         }
 
         /// <summary>

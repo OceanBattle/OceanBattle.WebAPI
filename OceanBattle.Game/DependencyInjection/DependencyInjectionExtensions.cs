@@ -20,7 +20,8 @@ namespace OceanBattle.Game.DependencyInjection
             services.RegisterTypedFactory<ISessionFactory>().ForConcreteType<Session>();
             services.AddTransient<ILevelsRepository, LevelsRepository>();
             services.AddTransient<IShipsRepository, ShipsRepository>();
-            services.AddTransient<PlayersManagerFactory>(provider => () => provider.GetRequiredService<IPlayersManager>());
+            services.AddTransient<PlayersManagerFactory>(provider => 
+            () => provider.GetRequiredService<IPlayersManager>());
 
             return services;
         }

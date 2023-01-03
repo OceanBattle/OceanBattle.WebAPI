@@ -87,7 +87,7 @@ namespace OceanBattle.Game.Models
 
         private IBattlefield CreateBattlefield(User player, int size)
         {
-            IBattlefield battlefield = _battlefieldFactory.Create(size, size);
+            IBattlefield battlefield = _battlefieldFactory.Create(Level);
             battlefield.Owner = player;
 
             battlefield.StatusChanged.Take(1)

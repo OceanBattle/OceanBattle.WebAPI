@@ -1,4 +1,5 @@
-﻿using OceanBattle.DataModel.Game.Abstractions;
+﻿using OceanBattle.DataModel.Game;
+using OceanBattle.DataModel.Game.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,6 @@ namespace OceanBattle.Game.Abstractions
 {
     public interface IBattlefieldFactory
     {
-        IBattlefield Create(int m, int n);
+        IBattlefield Create(Level level);
     }
 }

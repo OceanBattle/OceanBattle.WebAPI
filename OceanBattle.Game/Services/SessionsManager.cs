@@ -8,7 +8,7 @@ namespace OceanBattle.Game.Services
     public class SessionsManager : ISessionsManager
     {
         private readonly ISessionFactory _sessionFactory;
-        private readonly IPlayersManager _playersManager;
+        private readonly PlayersManagerFactory _playersManagerFactory;
 
         private List<IGameSession> _sessions = new List<IGameSession>();
         public IEnumerable<IGameSession> Sessions => _sessions.AsEnumerable();
@@ -18,7 +18,7 @@ namespace OceanBattle.Game.Services
             PlayersManagerFactory playersManagerFactory)
         {
             _sessionFactory = sessionFactory;
-            _playersManager = playersManagerFactory();
+            _playersManagerFactory = playersManagerFactory;
         }
 
         public void EndSessions(User creator)
@@ -35,10 +35,10 @@ namespace OceanBattle.Game.Services
                 (s.Oponent is not null && s.Oponent.Id == creatorId)))
                 return null;
 
-            User? creator = _playersManager.GetPlayer(creatorId);
+            User? creator = _playersManagerFactory().GetPlayer(creatorId);
 
             if (creator is null ||
-                !_playersManager.ActivePlayers.Contains(creator))
+                !_playersManagerFactory().ActivePlayers.Contains(creator))
                 return null;
 
             IGameSession session = _sessionFactory.Create(creator, level);

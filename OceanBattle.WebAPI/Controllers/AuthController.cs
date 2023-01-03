@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using OceanBattle.DataModel;
 using OceanBattle.DataModel.DTOs;
+using OceanBattle.DataModel.Game;
+using OceanBattle.Game.Abstractions;
 using OceanBattle.Jwks.Abstractions;
 using OceanBattle.Jwt.Abstractions;
 using OceanBattle.RefreshTokens.Abstractions;
@@ -28,6 +30,7 @@ namespace OceanBattle.Controllers
         private readonly IJwksFactory _jwksFactory;
         private readonly IRefreshTokenFactory _refreshTokenFactory;
         private readonly IRefreshTokenService _refreshTokenService;
+        private readonly ILevelsRepository _levelsRepository;
 
         public AuthController(
             ILogger<AuthController> logger,
@@ -36,7 +39,8 @@ namespace OceanBattle.Controllers
             IJwtService jwtService,
             IJwksFactory jwksFactory,
             IRefreshTokenFactory refreshTokenFactory,
-            IRefreshTokenService refreshTokenService)
+            IRefreshTokenService refreshTokenService,
+            ILevelsRepository levelsRepository)
         {
             _logger = logger;
             _userManager = userManager;
@@ -45,6 +49,7 @@ namespace OceanBattle.Controllers
             _jwksFactory = jwksFactory;
             _refreshTokenFactory = refreshTokenFactory;
             _refreshTokenService = refreshTokenService;
+            _levelsRepository = levelsRepository;
         }
 
         /// <summary>
@@ -149,6 +154,20 @@ namespace OceanBattle.Controllers
             {
                 keys = _jwksFactory.GetPublicKeys()
             });
+
+        [HttpGet("levels")]
+        public async Task<ActionResult<IEnumerable<LevelDto>>> GetLevels()
+        {
+            IEnumerable<Level> levels = _levelsRepository.GetLevels();
+            IEnumerable<LevelDto> levelDtos = levels.Select(l => new LevelDto
+            {
+                BattlefieldSize = l.BattlefieldSize,
+                AvailableTypes = l.AvailableTypes is null ? null : 
+                l.AvailableTypes.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value)
+            });
+
+            return Ok(levelDtos);
+        }
 
         #region private helpers
 

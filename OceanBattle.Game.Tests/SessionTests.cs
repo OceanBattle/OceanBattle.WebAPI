@@ -380,7 +380,7 @@ namespace OceanBattle.Game.Tests
             int battlefieldCount = 0;
 
             var factoryMock = new Mock<IBattlefieldFactory>(MockBehavior.Strict);
-            factoryMock.Setup(f => f.Create(level.BattlefieldSize, level.BattlefieldSize))
+            factoryMock.Setup(f => f.Create(level))
                        .Returns(() =>
                        {
                            var battlefieldMock = CreateBattlefieldMock();
@@ -462,7 +462,7 @@ namespace OceanBattle.Game.Tests
             Subject<(int x, int y)> gotHit)
         {
             var factoryMock = new Mock<IBattlefieldFactory>(MockBehavior.Strict);
-            factoryMock.Setup(factory => factory.Create(level.BattlefieldSize, level.BattlefieldSize))
+            factoryMock.Setup(factory => factory.Create(level))
                 .Returns(
                 () =>
                 {

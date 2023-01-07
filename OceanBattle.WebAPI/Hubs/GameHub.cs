@@ -48,7 +48,6 @@ namespace OceanBattle.WebAPI.Hubs
             if (battlefield is null)
                 return false;
 
-
             if (session.Next is null ||
                 session.Next.Id != Context.UserIdentifier!)
                 return false;
@@ -109,7 +108,8 @@ namespace OceanBattle.WebAPI.Hubs
             bool result = _playersManager.ConfirmReady(Context.UserIdentifier!);
 
             if (!result)
-                throw new NotAllShipsPlacedException();
+                //throw new NotAllShipsPlacedException();
+                return;
         }            
         
         public bool CanPlaceShip(int x, int y, Ship ship)
@@ -192,7 +192,11 @@ namespace OceanBattle.WebAPI.Hubs
 
         public async Task MakeActive()
         {
-            User user = await GetCurrentUserAsync();
+            User? user = await GetCurrentUserAsync();
+
+            if (user is null) 
+                return;
+
             _playersManager.AddAsActive(user);
             await UpdateActiveUsersAsync();
         }
@@ -276,15 +280,17 @@ namespace OceanBattle.WebAPI.Hubs
                 UserName = u.UserName 
             }));
         
-        private async Task<User> GetCurrentUserAsync()
+        private async Task<User?> GetCurrentUserAsync()
         {
             if (Context.User is null)
-                throw new UnauthorizedAccessException("UnauthorizedAccessException");
+                //throw new UnauthorizedAccessException("UnauthorizedAccessException");
+                return null;
 
             User? user = await _userManager.GetUserAsync(Context.User);
 
             if (user is null)
-                throw new UnauthorizedAccessException("UnauthorizedAccessException");
+                //throw new UnauthorizedAccessException("UnauthorizedAccessException");
+                return null;
 
             return user;
         }

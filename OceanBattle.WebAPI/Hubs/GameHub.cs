@@ -9,6 +9,7 @@ using OceanBattle.DataModel.DTOs;
 using OceanBattle.DataModel.Game;
 using OceanBattle.DataModel.Game.Abstractions;
 using OceanBattle.DataModel.Game.Exceptions;
+using OceanBattle.DataModel.Game.Ships;
 using OceanBattle.Game.Abstractions;
 
 namespace OceanBattle.WebAPI.Hubs
@@ -47,42 +48,54 @@ namespace OceanBattle.WebAPI.Hubs
             if (battlefield is null)
                 return false;
 
+
+            if (session.Next is null ||
+                session.Next.Id != Context.UserIdentifier!)
+                return false;
+
             return battlefield.CanBeHit(x, y);
         }
 
-        public BattlefieldDto Hit(int x, int y, Weapon weapon)
+        public BattlefieldDto? Hit(int x, int y, Weapon weapon)
         {
             IGameSession? session = 
                 _sessionsManager.FindSession(Context.UserIdentifier!);
 
             if (session is null)
-                throw new SessionNotFoundException();
+                //throw new SessionNotFoundException();
+                return null;
 
             IBattlefield? battlefield = 
                 session.GetBattlefield(Context.UserIdentifier!);
 
             if (battlefield is null)
-                throw new SessionNotFoundException();
+                //throw new SessionNotFoundException();
+                return null;
 
             // Validate weapon used.
             if (!ValidateWeapon(weapon, battlefield.Ships))
-                throw new InvalidHitException();
+                //throw new InvalidHitException();
+                return null;
 
             if (!session.IsActive)
-                throw new SessionInactiveException();
+                //throw new SessionInactiveException();
+                return null;
 
-            if (session.Next is null || 
+            if (session.Next is null ||
                 session.Next.Id != Context.UserIdentifier!)
-                throw new NotYourTurnException();
+                //throw new NotYourTurnException();
+                return null;
 
             battlefield = 
                 session.GetOponentBattlefield(Context.UserIdentifier!);
 
             if (battlefield is null)
-                throw new OponentNotFoundException();
+                //throw new OponentNotFoundException();
+                return null;
 
             if (!battlefield.Hit(x, y, weapon))
-                throw new InvalidHitException();
+                //throw new InvalidHitException();
+                return null;
 
             return new BattlefieldDto
             {
@@ -112,10 +125,11 @@ namespace OceanBattle.WebAPI.Hubs
             return battlefield.CanPlaceShip(x, y, ship);
         }
 
-        public BattlefieldDto PlaceShip(int x, int y, Ship ship)
+        public BattlefieldDto? PlaceShip(int x, int y, Ship ship)
         {
             if (!ValidateShip(ship))
-                throw new ShipNotAvailableException();
+                //throw new ShipNotAvailableException();
+                return null;
 
             IBattlefield? battlefield = GetBattlefield();
 
@@ -123,7 +137,8 @@ namespace OceanBattle.WebAPI.Hubs
                 throw new SessionNotFoundException();
 
             if (!battlefield.PlaceShip(x, y, ship))
-                throw new InvalidPlacementException();
+                //throw new InvalidPlacementException();
+                return null;
 
             return new BattlefieldDto
             {
@@ -132,13 +147,14 @@ namespace OceanBattle.WebAPI.Hubs
             };
         }
 
-        public BattlefieldDto AcceptInvite(UserDto inviteSender)
+        public BattlefieldDto? AcceptInvite(UserDto inviteSender)
         {
             IBattlefield? battlefield = 
                 _playersManager.AcceptInvite(Context.UserIdentifier!, inviteSender);
 
             if (battlefield is null)
-                throw new SessionNotFoundException();
+                //throw new SessionNotFoundException();
+                return null;
 
             return new BattlefieldDto 
             { 
@@ -150,15 +166,28 @@ namespace OceanBattle.WebAPI.Hubs
         public void InvitePlayer(UserDto player) 
             => _playersManager.InvitePlayer(player, Context.UserIdentifier!);
 
-        public IBattlefield CreateSession(Level level)
-        {         
+        public BattlefieldDto? CreateSession(LevelDto levelDto)
+        {
+            Level level = new Level
+            {
+                Id = levelDto.Id,
+                BattlefieldSize = levelDto.BattlefieldSize,
+                AvailableTypes = levelDto.AvailableTypes is null ? new Dictionary<Type, int>() : 
+                levelDto.AvailableTypes.ToDictionary(kvp => typesReversed[kvp.Key], kvp => kvp.Value)
+            };
+
             IGameSession? session = 
                 _sessionsManager.CreateSession(Context.UserIdentifier!, level);
 
             if (session is null)
-                throw new PlayerInvolvedInAnotherSessionException();
+                //throw new PlayerInvolvedInAnotherSessionException();
+                return null;
 
-            return session.Battlefields[0]!;
+            return new BattlefieldDto
+            {
+                Grid = session.Battlefields[0]!.Grid,
+                Ships = session.Battlefields[0]!.Ships
+            };
         }
 
         public async Task MakeActive()
@@ -175,6 +204,15 @@ namespace OceanBattle.WebAPI.Hubs
         }
 
         #region private helpers
+
+        private readonly Dictionary<string, Type> typesReversed = new Dictionary<string, Type>
+        {
+            { nameof(Corvette), typeof(Corvette) },
+            { nameof(Frigate), typeof(Frigate) },
+            { nameof(Destroyer), typeof(Destroyer) },
+            { nameof(Cruiser), typeof(Cruiser) },
+            { nameof(Battleship), typeof(Battleship) }
+        };
 
         private bool ValidateShip(Ship ship)
         {

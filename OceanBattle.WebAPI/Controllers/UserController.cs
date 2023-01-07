@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using OceanBattle.Data;
 using OceanBattle.DataModel;
 using OceanBattle.DataModel.DTOs;
+using OceanBattle.DataModel.Game.Abstractions;
 using OceanBattle.Game.Abstractions;
 
 namespace OceanBattle.Controllers
@@ -70,12 +72,21 @@ namespace OceanBattle.Controllers
                 return BadRequest(ModelState);
 
             string id = _userManager.GetUserId(User)!;
+
             User user = (await _dbContext.Users.FindAsync(id))!;
+
+            IEnumerable<Warship> warships = 
+                _dbContext.Warships.Where(w => w.UserId == id).Include(w => w.Weapons);
+
+            //IEnumerable<Ship> ships = _dbContext.Ships.Where(s => s.UserId == id);
+
+            List<Ship> vessels = warships.Select(w => w as Ship).ToList();
 
             UserDto dto = new UserDto
             {
                 Email = user.Email,
-                UserName = user.UserName
+                UserName = user.UserName,
+                OwnedVessels = vessels
             };
 
             return Ok(dto);

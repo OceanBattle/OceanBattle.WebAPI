@@ -155,20 +155,6 @@ namespace OceanBattle.Controllers
                 keys = _jwksFactory.GetPublicKeys()
             });
 
-        [HttpGet("levels")]
-        public async Task<ActionResult<IEnumerable<LevelDto>>> GetLevels()
-        {
-            IEnumerable<Level> levels = _levelsRepository.GetLevels();
-            IEnumerable<LevelDto> levelDtos = levels.Select(l => new LevelDto
-            {
-                BattlefieldSize = l.BattlefieldSize,
-                AvailableTypes = l.AvailableTypes is null ? null : 
-                l.AvailableTypes.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value)
-            });
-
-            return Ok(levelDtos);
-        }
-
         #region private helpers
 
         /// <summary>

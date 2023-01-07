@@ -38,6 +38,7 @@ namespace OceanBattle.WebAPI.Controllers
             IEnumerable<Level> levels = _levelsRepository.GetLevels();
             IEnumerable<LevelDto> levelDtos = levels.Select(l => new LevelDto
             {
+                Id = l.Id,
                 BattlefieldSize = l.BattlefieldSize,
                 AvailableTypes = l.AvailableTypes is null ? null :
                 l.AvailableTypes.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value)

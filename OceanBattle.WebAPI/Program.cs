@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using OceanBattle.Data;
 using OceanBattle.DataModel;
 using OceanBattle.Game.DependencyInjection;
@@ -60,7 +62,16 @@ namespace OceanBattle
             }).AddEntityFrameworkStores<AppDbContext>()
               .AddDefaultTokenProviders();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                            .AddNewtonsoftJson(options => 
+                            {
+                                options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                                options.SerializerSettings.Formatting = Formatting.None;
+                                options.SerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+                                options.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
+                                options.SerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+                                options.SerializerSettings.TypeNameHandling = TypeNameHandling.Auto;
+                            });
 
             builder.Services.AddAuthentication()
                             .AddJwtBearer(builder.Configuration.GetSection(nameof(JwtOptions)), 
@@ -75,7 +86,17 @@ namespace OceanBattle
             builder.Services.AddAuthorizationCore();
             builder.Services.AddOceanBattleGame<GameInterface>();
 
-            builder.Services.AddSignalR();
+            builder.Services.AddSignalR()
+                            .AddNewtonsoftJsonProtocol(options =>
+                            {
+                                options.PayloadSerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+                                options.PayloadSerializerSettings.Formatting = Formatting.None;
+                                options.PayloadSerializerSettings.DefaultValueHandling = DefaultValueHandling.Ignore;
+                                options.PayloadSerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Serialize;
+                                options.PayloadSerializerSettings.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+                                options.PayloadSerializerSettings.TypeNameHandling = TypeNameHandling.Auto;
+                                options.PayloadSerializerSettings.ContractResolver = new DefaultContractResolver();
+                            });
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();

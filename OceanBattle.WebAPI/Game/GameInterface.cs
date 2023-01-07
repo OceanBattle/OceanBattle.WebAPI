@@ -2,6 +2,7 @@
 using OceanBattle.DataModel;
 using OceanBattle.DataModel.ClientData;
 using OceanBattle.DataModel.DTOs;
+using OceanBattle.DataModel.Game.Abstractions;
 using OceanBattle.Game.Abstractions;
 using OceanBattle.Game.Models;
 using OceanBattle.WebAPI.Hubs;
@@ -34,7 +35,15 @@ namespace OceanBattle.WebAPI.Game
             if (clients is null)
                 return;
 
-            await clients.StartDeploymentAsync();
+            LevelDto level = new LevelDto
+            {
+                Id = session.Level.Id,
+                BattlefieldSize = session.Level.BattlefieldSize,
+                AvailableTypes = session.Level.AvailableTypes is null ? null :
+                session.Level.AvailableTypes.ToDictionary(kvp => kvp.Key.Name, kvp => kvp.Value)
+            };
+
+            await clients.StartDeploymentAsync(level);
         }
 
         public async Task EndGame(IGameSession session)
@@ -49,22 +58,52 @@ namespace OceanBattle.WebAPI.Game
 
         public async Task StartGame(IGameSession session)
         {
-            IGameClient? clients = GetGameClients(session);
-
-            if (clients is null)
+            if (session.Creator is null || 
+                session.Oponent is null)
                 return;
 
-            await clients.StartGameAsync();
+            IBattlefield? oponentBattlefield = 
+                session.GetOponentBattlefield(session.Creator.Id);
+
+            if (oponentBattlefield is null)
+                return;
+
+            IBattlefield? creatorBattlefield =
+                session.GetOponentBattlefield(session.Oponent.Id);
+
+            if (creatorBattlefield is null)
+                return;
+
+            await _hubContext.Clients.User(session.Creator.Id)
+                .StartGameAsync(new BattlefieldDto
+                {
+                    Grid = oponentBattlefield.AnonimizedGrid,
+                    Ships = oponentBattlefield.AnonimizedShips
+                });
+
+            await _hubContext.Clients.User(session.Oponent.Id)
+                .StartGameAsync(new BattlefieldDto
+                {
+                    Grid = creatorBattlefield.AnonimizedGrid,
+                    Ships = creatorBattlefield.AnonimizedShips
+                });
         }
 
         public async Task GotHit(IGameSession session, User hitPlayer, (int x, int y) coordinates)
         {
-            IGameClient? clients = GetGameClients(session);
-
-            if (clients is null)
+            IBattlefield? battlefield = session.GetBattlefield(hitPlayer);
+            
+            if (battlefield is null) 
                 return;
 
-            await clients.GotHitAsync();
+            BattlefieldDto battlefieldDto = new BattlefieldDto
+            {
+                Grid = battlefield.Grid,
+                Ships = battlefield.Ships
+            };
+
+            await _hubContext.Clients.User(hitPlayer.Id)
+                .GotHitAsync(battlefieldDto, coordinates.x, coordinates.y);
         }
 
         public async Task SendInvite(string recieverId, User sender) 

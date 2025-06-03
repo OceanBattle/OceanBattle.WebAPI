@@ -27,8 +27,10 @@ namespace OceanBattle
 
             if (builder.Environment.IsProduction())
             {
-                builder.Services.AddDbContext<AppDbContext>(options => 
-                options.UseSqlServer(connectionString));
+                var connection = new SqliteConnection(connectionString);
+                connection.Open();
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseSqlite(connection));
             }
 
             if (builder.Environment.IsDevelopment())
